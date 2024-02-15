@@ -1,0 +1,270 @@
+Spring Security
+
+Spring Security is a powerful and highly customizable authentication and access-control framework. 
+It is supplied as a "ready made aspect" , from spring security framework , that can be easily plugged in spring MVC application.
+
+It is "THE" standard for securing Spring-based applications. Spring Security is a framework that focuses on providing both authentication and authorization to Java applications. 
+
+Like all Spring projects, the real power of Spring Security is found in how easily it can be extended to meet custom requirements.
+
+Features
+
+1. Comprehensive and extensible support for both Authentication and Authorization
+2. Protection against attacks like session fixation, clickjacking, cross site request forgery, etc..
+3.Servlet API integration (Uses Servlet Filter chain)
+4.Integration with Spring Web MVC.
+
+Common Security Terms
+
+Credentials : Way of confirming the identity of the user (email /username , password typically)
+Principal: Currently logged in user.
+Authentication: Confirming truth of credentials(i.e confirming who you are)
+Authorisation: Defines access policy for the Principal.(i.e confirming your permissions, i.e what you can do)
+GrantedAuthority: Permission granted to the principal.
+AuthenticationManager (i/f): Controller in the authentication process. Authenticates user details via authenticate() method.
+
+Steps
+
+1. Create a new spring boot project (RESTful web service) , adding usual dependenices . DO NOT add spring security yet. Copy earlier working application.properties.
+NOTE : spring boot version downgrade : 2.6.7
+
+2. Add a ProductController , with 3 end points
+
+/home  (should be accessible to all) 
+/purchase (should be for authenticated User in customer role)
+/add_product (should be for authenticated User in admin role)
+
+Currently : respond to GET method , with simple string response.
+
+3. Test it .(using browser/postman)
+Did it work ????
+
+4. Add spring security dependency 
+ . Test the end points again.
+Did it work ?  NO
+
+Observation : Suddenly n automatically all end points are now protected. So on browser it will prompt you to login form (spring security supplied) On postman it will give you HTTP 401 (Un authorized error)
+
+We  have not yet supplied any credentials .
+Def credentials are : user n password(UUID : universally unique ID : 128 bit) from server console.
+
+So w/o configuring anything , the moment spring security JARs are added , all your end points are secured automatically .
+
+Thus Spring Boot(running on the top of the Spring Framework)  , provides a ready made aspect(solution to cross cutting concern like authetication n authorization)  in form of spring security
+
+After supplying correct credentials(i.e after authentication) , spring security will redirect you to the resource : http://localhost:8080/home ,and you  will be able to access it.
+Supplies you automatically with a logout page (test it on the browser)
+
+
+Observe on postman(w/o setting authorization header)
+Response : (HTTP 401)
+
+From authorization , choose Basic Authentication (referred as Basic Auth) , 
+Add user name n password.
+
+It will be encoded using base64 encoding.
+
+Basic authentication, or “basic auth” is formally defined in the HTTP standard.  When a client (your browser) connects to a web server, it sends a “WWW-Authenticate: Basic” message in the HTTP header. After that, it sends your login credentials to the server using a mild concealment technique called base64 encoding.
+
+Not desirable , to use such credentials , so continue to next step.
+
+5. Can you configure username n password , in a property file ?
+YES .
+
+
+Add these 2 properties in application.properties file
+spring.security.user.name=
+spring.security.user.password=
+
+So now instead of spring security generated user name n pwd , these will be used for authentication.
+
+6. Ultimate goal is using DB to store the authentication details . 
+BUT immediate next goal , to understand spring security is : Basic In memory authentication
+
+The credentials will be stored in memory.
+Comment earlier properties from app property file.
+
+6.1 Add security config class, extending org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+It's a convenient base class , to customize security configuration
+
+6.2 Class level annotations
+@EnableWebSecurity
+@Configuration (annotation based approach equivalent to bean config xml file containing <bean id xml..../>)
+
+
+6.3 Override
+protected void configure(AuthenticationManagerBuilder auth) throws Exception
+for supplying authentication details
+
+6.4 Refer to diag : spring security architecture
+Refer to readme : "spring sec auth flow"
+Diagram : detailed flow.png
+
+Add in memory authentication to the AuthenticationManagerBuilder , which will  allow customization of the same.
+
+API Methods
+inMemoryAuthentication 
+withUser
+password
+roles
+and
+
+eg : 
+auth.inMemoryAuthentication().withUser("kiran").password(encoder().encode("1234")).roles("USER")
+.and().withUser("rama").password(encoder().encode("3456")).roles("ADMIN");
+
+
+6.5 For supplying authorization details : 
+Objective : 
+/home : accessible to all 
+/admin : only to admin user
+/user : accessible to user n admin role
+
+
+
+Override 
+protected void configure(HttpSecurity http) throws Exception
+
+By extending from WebSecurityConfigurerAdapter and only a few lines of code we can do the following:
+1. Require the user to be authenticated prior to accessing any URL within our application
+2. Create a user with the username “user”, password “password”, and role of “USER”
+3. Enables HTTP Basic and Form based authentication
+4. Spring Security will automatically render a login page and logout success page for you
+
+
+Refer to it's super class 's implementation n use it for overriding
+Methods :
+authorizeRequests()
+antMatchers(String matchers...)
+hasRole(String roleName) : no ROLE prefix
+httpBasic()
+formLogin
+
+
+
+eg : 
+http.authorizeRequests().antMatchers("/admin").
+		hasRole("ADMIN").
+		antMatchers("/user").hasAnyRole("USER", "ADMIN")
+				.antMatchers("/", "/home").permitAll()
+				 .and().httpBasic()
+				.and().formLogin();
+
+6.6 Run the application.
+Problem : java.lang.IllegalArgumentException: There is no PasswordEncoder mapped for the id "null"
+
+Reason -- Prior to Spring Security 5.0 the default PasswordEncoder was NoOpPasswordEncoder which required plain text passwords. 
+From  Spring Security 5, the default is DelegatingPasswordEncoder, which requires Password Storage Format.
+
+Solution : provide Password encoder bean
+
+@Bean // equivalent to <bean id ...> tag in xml)
+	public PasswordEncoder encoder() {		
+		return new BCryptPasswordEncoder();
+	}
+
+Test the application.
+
+
+7. Replace in memory authentication by DB based authentication.
+Using Spring Data JPA.
+
+
+7.1 Edit application.properties file with DB settings.
+Can optionally add these for debugging.
+debug=true
+logging.level.org.springframework.security=DEBUG
+
+7.2 In Security config class 
+replace in memory authentication , by UserDetailsService based auth mgr builder 
+refer to diag : detailed flow.png
+
+API of AuthenticationManagerBuilder
+
+public DaoAuthenticationConfigurer userDetailsService(UserDetailsService service) throws Exception
+
+Add authentication based upon the custom UserDetailsService that is passed in. It then returns a DaoAuthenticationConfigurer to allow customization of the authentication.
+
+So auto wire UserDetailsService n use it. Set password encoder.
+
+eg : 
+@Autowired
+private UserDetailsService userDetailsService; 
+protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		//since there is no out-of-box imple for JPA based auth , u have to create a custom class imple UserDetailsService n inject it here, n set password encoder
+		auth.userDetailsService(userDetailsService).passwordEncoder(encoder());
+
+	}
+
+7.3 
+The org.springframework.security.core.userdetails.UserDetailsService interface is used to retrieve user-related data. It has one method named loadUserByUsername() which can be overridden to customize the process of finding the user.
+
+It is used by the DaoAuthenticationProvider to load details about the user during authentication.
+It is used throughout the framework as a user DAO and is the strategy used by the DaoAuthenticationProvider.
+
+class DaoAuthenticationProvider : 
+Represents an AuthenticationProvider implementation that retrieves user details from a UserDetailsService.
+
+Method
+UserDetails loadUserByUsername(java.lang.String username)
+                        throws UsernameNotFoundException
+
+7.4 How to load user by user name ?
+
+1. Create POJOs User n Role with many-many (UserEntity *---->* Role) EAGER  or can later replace it by UserEntity *---->1 Role
+UserEntity  extending from BaseEntity 
+Properties : userName,email,	password,active, roles : Set<Role>
+Role : id , enum UserRole (ROLE_USER....)
+
+2. DAO layer : UserRepository -- findByUserName
+RoleRepository
+
+3. Create custom implementation of org.springframework.security.core.userdetails.UserDetailsService
+n implement
+UserDetails loadUserByUsername(String username)
+                        throws UsernameNotFoundException
+In case , user entity not found , raise UsernameNotFoundException , with suitable error message.
+
+4. In case of success , create custom implementation of , org.springframework.security.core.userdetails.UserDetails i/f
+, by passing to it's constructor , User entity details , lifted from DB
+
+o.s.s.c.userdetails.UserDetails : represents core user information. It stores
+	  user information which is later encapsulated into Authentication object. This
+	  allows non-security related additional user information (eg : email
+	  acct expiry, user enabled ... ) in addition to user name n password to be stored in a convenient location.
+
+
+One important method in above i/f to implement is 
+	public Collection<? extends GrantedAuthority> getAuthorities() , which should return , granted authorities (role based) for the loaded user.
+eg : user => UserEntity
+user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getUserRole().name()))
+.collect(Collectors.toList());
+	
+5. Implement all other methods , suitably .
+
+
+How to run ?
+1. Write dao layer test case : to add 2 roles : ROLE_ADMIN n ROLE_USER
+
+2. Write dao layer test case : to add 2 users , with admin n user role each.
+
+3. For hashing the password :
+
+use  : 
+https://bcrypt-generator.com/
+For more details : https://dzone.com/articles/hashing-passwords-in-java-with-bcrypt#:~:text=One%20way%20hashing%20%2D%20BCrypt%20is,hashes%20across%20each%20user's%20password.
+-----------------------------------
+Project Tip : 
+Later to test it with React/Angular front end :
+use below for authorization.
+
+	http.csrf().disable().
+		cors().and().
+		authorizeRequests().
+		
+		antMatchers(HttpMethod.OPTIONS, "/**").permitAll().
+		antMatchers("/", "/home", "/api/signup").permitAll().	
+		antMatchers("/admin").hasRole("ADMIN").
+		antMatchers("/user").hasAnyRole("USER", "ADMIN").
+		and().httpBasic();
+

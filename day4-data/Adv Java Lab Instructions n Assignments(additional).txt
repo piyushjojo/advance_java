@@ -1,0 +1,94 @@
+Advanced Java 
+Day 3.
+1. Revise JVM architecture
+
+2. Create new workspace for advanced java.
+
+3. import day1.1 , edit build path n DB credentials from DBUtils n revise JDBC steps
+
+4. import day1.2 , edit build path n DB credentials from DBUtils n revise beginning of layered architecture. (refer to diagrams)
+POJO layer n DAO layer i/f
+
+5. Please confirm this (MUST)
+5.1 JDK version MUST be JDK 11
+5.2 Eclipse STS version must be STS 3.9.18
+Otherwise you will face problems later
+If you are using any different versions , refer to core java help : 1st day installation instructions n fix it.
+-------------------------------
+6. Hands on
+ref table : my_emp
+Write JDBC application for : 
+6.1 Display emp details for all emps , earning salary > specified salary n joined before specified date.
+6.2 Update emp salary
+i/p : emp id n salary increment
+6.3 Delete emp details 
+i/p : emp id
+6.4 Add new emp details
+i/p : emp details (excluding emp id)
+Hint : sql="insert into my_emp values(default,?,?,?,?,?)";
+
+Day 4
+1. Before revision , if you not yet added Tomcat server 
+1.1 Add tomcat server in IDE
+1.2 Create dynamic web project , create index.html n test it.
+
+2. import day4.1 as , Java SE project n revise
+2.1 Layered Architecture
+Tester --DAO (uses DBUtils) --POJO --DB
+2.2 Execution of the stored procedure
+
+3. import day4_web as dynamic web project n revise the folder structure n request-response flow
+
+4. Hands on (will be discussed with lab faculty)
+4.1 Copy voters n candidates tables from today's help.
+(refer : "day4-data\day4_help\my_sql_cmds_voting.txt"
+
+4.2 Refer to : "day4-data\day4_help\case studies\voting assignment.png"
+
+
+
+4.3 Prepare Tester --DAO(uses DBUtils)--POJO for the following , in bottoms up manner.
+1. Voter/Admin authentication
+2. Get candidate list.
+3. Update Voting status
+4. Increment chosen candidate's votes.
+Steps
+1. Create new java project : day4_jdbc_lab ( add my sql connector jar)
+2. Copy DBUtils
+3. Voter/Admin authentication
+3.1 Create Voter POJO
+Hint : votingStatus : boolean
+3.2 IVoterDao 
+Voter authenticateUser(String name ,String password) throws SqlExc;
+3.3 VoterDaoImpl
+1 state : cn pst1
+2. ctor : open cn , pst1=.....
+3 clean up : close --pst1 ,cn
+4 CRUD : 
+Voter authenticateUser(String name ,String password) throws SqlExc;
+set IN params
+exec query ---> RST --> process RST --> if (rst.next) ---> Voter pojo --> ret
+in case of failue --ret null.
+
+3.4 Tester -- create dao instace --invoke method--clean up
+
+
+4. Get candidate list.
+4.1 Candidate POJO
+4.2 ICandidateDao
+List<Candidate> fetchAllCandidates() throws SqlExc;
+
+5. Update Voting status
+Add another method in IVoterDao 
+String updateVotingStatus(int voterId/name) throws SqlExc;
+
+6.Increment chosen candidate's votes.
+Add another method in ICandidateDao
+String incrementVotes(int candidateId) throws SqlExc;
+
+NOTE : 
+If required : do refer to this primer in TCP/IP in web programming
+https://www.techtarget.com/searchnetworking/definition/TCP-IP#:~:text=TCP%2FIP%20stands%20for%20Transmission,(an%20intranet%20or%20extranet).
+
+
+

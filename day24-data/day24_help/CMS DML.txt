@@ -1,0 +1,69 @@
+ drop table user_roles,comments,adr_tbl,user_hobbies,user_cards,tutorials,users,roles,tag_tutorial,tags,topics;
+
+Run ref project : day19_boot_cms or day19_lab
+Tables for CMS will be created.
+
+
+#CMS DML
+
+insert into roles values(1,'ADMIN');
+insert into roles values(2,'AUTHOR');
+insert into roles values(3,'CUSTOMER');
+
+#users : id | email  | first_name | last_name | creation_date | exp_date | country | location |passport_number | password
+insert into users values(default,'rama@gmail.com','Rama','Seth','2010-1-1','2025-1-1','India','Mumbai','K4642256','12345');
+
+insert into users values(default,'kiran@gmail.com','Kiran','Shaha','2011-1-1','2026-1-1','India','Delhi','M6642256','2345');
+
+insert into users values(default,'riya@gmail.com','Riya','Pathak','2009-1-20','2024-11-1','India','Mumbai','K9842256','3445');
+
+insert into users values(default,'shekhar@gmail.com','Shekhar','Rao','2009-11-20','2024-1-1','India','Mumbai','K9742256','3345');
+
+
+#rama : admin
+insert into user_roles values(1,1);
+#kiran : author
+insert into user_roles values(2,2);
+#riya : customer
+insert into user_roles values(3,3);
+#shekhar : customer
+insert into user_roles values(4,3);
+
+# adr_tbl : user_id | adr_line1 | adr_line2 | city      | country | state | zip_code 
+insert into adr_tbl  values(1,'Bldg 10','Runwal Sakshi','Mumbai','India','MH','234567');
+
+insert into user_hobbies values(1,'reading');
+insert into user_hobbies values(1,'music');
+
+insert into user_cards values(1,'visa123456','345','2023-1-1','debit');
+insert into user_cards values(1,'master23456','346','2023-11-21','credit');
+
+#topics id | topic_name
+insert into topics values(1,'Spring');
+insert into topics values(2,'REST');
+
+#tutorials :  id | contents  | pub_date   | title           | visits | author_id | selected_topic_id
+insert into tutorials values(default,'Explains D.I n AOP in detail','2020-1-1','Spring Core',10,2,1);
+
+insert into tutorials values(default,'Explains Spring MVC in details ','2020-11-21','Spring MVC Flow',13,2,1);
+
+insert into tutorials values(default,'Explains Spring AOP in details ','2020-11-21','Spring AOP',20,2,1);
+
+insert into tutorials values(default,'Explains Spring REST Controller','2020-11-21','Spring Boot REST ',27,2,1);
+
+#comments : id  |comment_text | cust_id    | tut_id
+
+insert into comments values(default,'Spring core comment 1',3,1);
+insert into comments values(default,'Spring core comment 2',4,1);
+insert into comments values(default,'Spring MVC comment 1',3,2);
+insert into comments values(default,'Spring MVC comment 2',4,2);
+
+#tags :  id | tag_name
+insert into tags values(1,'full stack');
+insert into tags values(2,'java');
+
+#tag_tutorial :  id  | created_on | tag_id   | tut_id
+insert into tag_tutorial values (1,'2022-3-4',1,4);
+insert into tag_tutorial values (2,'2022-4-14',2,3);
+
+

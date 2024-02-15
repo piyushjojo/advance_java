@@ -1,0 +1,228 @@
+Revise JSP-JB flow created so far 
+
+
+Any problems observed with server pull ?
+
+
+
+What's the solution ? (Double submit guard)
+replace server pull ---> clnt pull
+<c:redirect> : JSTL action --- only candidate list  related DB query gets fired.
+
+Which tag will you use in JSP for clnt pull ?(redirect scenario) --no standard action exists : so use 
+JSTL action
+
+Import JSTL core tag lib n use tag.
+Steps
+1. Copy/confirm jstl1.2.jar under <tomcat> / lib
+2. Import JSTL supplied core tag lib
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+3. Use the tag
+eg : In one.jsp : 
+<c:redirect url="two.jsp"/>
+WC : 
+If cookies are enabled ,WC sends resp : ??????????????????
+
+ if cookies are disabled , WC sends resp :   ?????????????????????
+
+
+1. Objective --add new tut (show form phase)
+Steps
+1. DB table : topics
+2. pojo : Topic 
+3. Topic Dao : get all topics
+4. Topic Bean : 
+state : topic dao ref , 
+def ctor : topic dao inst
+s/g 
+B.L : get all topics
+
+B.L : validate tut details
+In case of successful validations , insert tutorial record
+
+---------------------------------
+Other JSTL Tags
+
+1. <c:set var="abc" value="${param.name}" scope="session"/>
+WC : session.setAttribute("abc",request.getParameter("name"));
+
+2. <c:remove var="abc"  scope="session"/>
+WC : session.removeAttribute("abc") (equivalent to Map's remove)
+
+3. <c:set var="abc" value="${param.name}"/>
+WC : pageContext.setAttribute("abc",request.getParameter("name"));
+
+4. eg : In HTML form 
+<input type="submit" name="btn" value="Withdraw">
+<input type="submit" name="btn" value="Deposit">
+In transactions.jsp
+<c:if test="${param.btn eq 'Withdraw'}">
+ In withdraw 
+</c:if>
+WC : 
+if(request.getParameter("btn").equals("Withdraw")
+ out.print("in withdraw")
+Use case : voter login --success -not yet voted --list.jsp ---status.jsp
+voter login --success -alrdy  voted ----status.jsp
+
+status.jsp : after casting a vote => increment votes n change voting status
+directly : u have alrdy voted => no action --display a message
+eg : 
+<c:if test="${sessionScope.voter.status}">
+ You have alrdy voted....
+</c:if>
+
+
+5. 
+<c:choose>
+ <c:when test="${param.btn eq 'Withdraw'}">
+ In withdraw 
+ </c:when>
+ <c:when test="${param.btn eq 'Deposit'}">
+In Deposit
+ </c:when>
+ <c:otherwise>
+ some other btn ......
+ </c:otherwise>
+</c:choose>
+
+URL :  
+http://host:port/one.jsp?name="Ranjana"
+
+In one.jsp
+<c:set var="abc" value="${param.name}" scope="session"/> 
+<c:redirect url="two.jsp"/>
+WC : response.sendRedirect(response.encodeRedirectURL("two.jsp"));
+
+In two.jsp
+${sessionScope.abc} : Ranjana  ---Even if cookies are enabled/disabled
+
+eg : 
+<c:redirect url="${sessionScope.user.validateUser()}.jsp"/>
+
+Objective : In case of invalid login , forward the clnt to login page BUT with error mesg
+-------------------------
+More Practice n revision 
+
+JSP Syntax (2.x)
+
+JSP implicit objs : accessible from scriptlets(<% java code %>  n expressions (<%= dynamic expr %>)
+request,response, session, config,out,application,page , pageContext, exception
+eg : one.jsp --- one_jsp.java 
+<%= page %>
+o/p  : org.apche.jsp.one_jsp@5375675
+page => instance of translated page class
+
+pageContext : JSP implicit obj : accessible from scriptlets n exprs
+
+javax.servlet.jsp.PageContext class --abstract --- concrete sub class ---server supplied jar (jasper.jar)
+--PageContextImpl --current page environment
+
+It holds the references of all other implicit objects
+eg : request,response, session, config,out....
+Methods : getSession, getOut,getRequest.....
++ to store page scoped attr.
+
+
+Which is better alternative to <%= .... %> JSP exprs ?
+EL syntax
+${...} : added directly in JSP body
+
+
+EL implicit objs (names of maps created by WC , except pageContext)
+param,pageScope,requestScope,sessionScope,applicationScope,cookie,initParam
+eg : ${param.email} 
+WC : out.print(param.get("email"));
+OR : request.getParameter("email") --> sent to clnt
+
+
+Solve : ${requestScope.user_info}
+WC : request.getAttribute("user_info") ---> sent to clnt
+
+${cart} : 
+WC : pageContext.getAttribute("cart") --null
+request.getAttribute("cart") --null
+session.getAttribute("cart") --not null --to string --sent to clnt
+
+
+
+eg : In one.jsp 
+<%
+    pageContext.setAttribute("nm",val);
+%>
+
+How to acces this attribute from one.jsp ? 
+Options
+1. ${nm}
+2. ${pageContext.nm}
+3. ${page.nm}
+4. ${pageScope.nm}
+5. <%= pageContext.getAttribute("nm") %>
+
+Ans : 1,4,5
+
+
+
+Q. How to get a cookie value , with a name JSESSIONID ?
+
+JSP expression
+<%= session.getId() %>
+
+
+OR 
+via cookie : EL syntax 
+${session.id} : wrong(since session IS NOT EL impl obj)
+${pageContext.session.id} => pageContext.getSession().getId() --> sent to clnt
+OR
+${cookie.JSESSIONID.value} => cookie.get("JSESSIONID").getValue()  --> sent to clnt
+
+
+
+pageContext : can be accessed from
+1. declaration
+2. expression
+3. EL
+4 scriptlets
+Ans : 2,3,4
+
+Various uses of pageContext
+Solve
+
+eg : ${pageContext.session.id} -- 
+WC : pageContext.getSession().getId() --> sent to clnt
+
+What will be o/p for
+http://host:port/day8/one.jsp
+In one.jsp : 
+${pageContext.request.contextPath} --
+WC : pageContext.getRequest().getContextPath() ---> sent to clnt
+o/p : /day8
+
+
+How will you get the value of session time out ?
+?
+1. session = HttpSession
+2. sessionScope = name of the map containing session scoped attrs
+Ans : 1
+HOW ? ${pageContext.session.maxInactiveInterval} =>  pageContext.getSession().getMaxInactiveInterval()
+
+JSP Expression : <%= session.getMaxInactiveInterval() %>
+
+
+How to set session scoped attribute ?
+
+<%
+   session.setAttribute("nm",val); 
+%>
+How to retrieve using following options ?
+1. session => HttpSession (Hint : JSP expression)
+<%= session.getAttribute("nm") %>
+
+OR
+2. sessionScope = name of the map containing session scoped attrs
+Better option (EL syntax) : 
+${sessionScope.nm)
+OR
+${nm}
+
+Reading H.W : refer to params vs attrs

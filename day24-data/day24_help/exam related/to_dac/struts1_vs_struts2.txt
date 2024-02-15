@@ -1,0 +1,44 @@
+In the following section, we are going to compare the various features between the two frameworks. Struts 2.x  is very simple as compared to struts 1.x,  few of its excelent features are:
+
+1.  Servlet Dependency:
+
+Actions in Struts1 have dependencies on the servlet API since the HttpServletRequest and HttpServletResponse objects are passed to the execute method when an Action is invoked but in case of Struts 2, Actions are not container dependent because they are made simple POJOs. In struts 2, the servlet contexts are represented as simple Maps which allows actions to be tested in isolation. Struts 2 Actions can access the original request and response, if required. However, other architectural elements reduce or eliminate the need to access the HttpServetRequest or HttpServletResponse directly.
+
+2.  Action classes
+
+Programming the abstract classes instead of interfaces is one of design issues of struts1 framework that has been resolved in the struts 2 framework. 
+Struts1 Action classes needs to extend framework dependent abstract base class. But in case of Struts 2 Action class may or may not implement interfaces to enable optional and custom services. In case of Struts 2 , Actions are not container dependent because they are made simple POJOs. Struts 2 provides a base ActionSupport class to implement commonly used interfaces. Albeit, the Action interface is not required. Any POJO object with an execute signature can be used as an Struts 2 Action object.
+
+3.  Validation
+
+Struts1 and Struts 2 both supports the manual validation via a validate method.
+Struts1 uses validate method on the ActionForm, or validates through an extension to the Commons Validator. However, Struts 2 supports manual validation via the validate method and the XWork Validation framework. The Xwork Validation Framework supports chaining validation into sub-properties using the validations defined for the properties class type and the validation context.
+
+4.  Threading Model
+
+In Struts1, Action resources must be thread-safe or synchronized. So Actions are singletons and thread-safe, there should only be one instance of a class to handle all requests for that Action. The singleton strategy places restrictions on what can be done with Struts1 Actions and requires extra care to develop. However in case of Struts 2, Action objects are instantiated for each request, so there are no thread-safety issues. (In practice, servlet containers generate many throw-away objects per request, and one more object does not impose a performance penalty or impact garbage collection.)
+
+5.  Testability
+
+Testing Struts1 applications are a bit complex. A major hurdle to test Struts1 Actions is that the execute method because it exposes the Servlet API. A third-party extension, Struts TestCase, offers a set of mock object for Struts1. But the Struts 2 Actions can be tested by instantiating the Action, setting properties and invoking methods. Dependency Injection support also makes testing simpler. Actions in struts2 are simple POJOs and are framework independent,  hence testability is quite easy in struts2.
+
+6.  Harvesting Input
+
+Struts1 uses an ActionForm object to capture input. And all ActionForms needs to extend a framework dependent base class. JavaBeans cannot be used as ActionForms, so the developers have to create redundant classes to capture input. 
+However Struts 2 uses Action properties (as input properties independent of underlying framework) that eliminates the need for a second input object, hence reduces redundancy. Additionally in struts2, Action properties can be accessed from the web page via the taglibs. Struts 2 also supports the ActionForm pattern, as well as POJO form objects and POJO Actions. Even rich object types, including business or domain objects, can be used as input/output objects.
+
+7.  Expression Language
+
+Struts1 integrates with JSTL, so it uses the JSTL-EL. The struts1 EL has basic object graph traversal, but relatively weak collection and indexed property support. Struts 2 can also use JSTL, however it supports a more powerful and flexible expression language called "Object Graph Notation Language" (OGNL).
+
+8.  Binding values into views
+
+In the view section, Struts1 uses the standard JSP mechanism to bind objects (processed from the model section) into the page context to access. However Struts 2 uses a "ValueStack" technology so that the taglibs can access values without coupling your view to the object type it is rendering. The ValueStack strategy allows the reuse of views across a range of types which may have the same property name but different property types.
+
+9.  Type Conversion
+
+Usually, Struts1 ActionForm properties are all Strings. Struts1 uses Commons-Beanutils for type conversion. These type converters are per-class and not configurable per instance. However Struts 2 uses OGNL for type conversion. The framework includes converters for basic and common object types and primitives.
+
+10.  Control Of Action Execution
+
+Struts1 supports separate Request Processor (lifecycles) for each module, but all the Actions in a module must share the same lifecycle. However Struts 2 supports creating different lifecycles on a per Action basis via Interceptor Stacks. Custom stacks can be created and used with different Actions as needed.

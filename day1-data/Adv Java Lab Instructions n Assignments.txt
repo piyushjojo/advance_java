@@ -1,0 +1,27 @@
+Advanced Java 
+Day 1.
+1. Revise JVM architecture
+
+2. Create new workspace for advanced java.
+
+3. import day1.1 , edit build path n DB credentials from DBUtils n revise JDBC steps
+
+4. import day1.2 , edit build path n DB credentials from DBUtils n revise beginning of layered architecture. (refer to diagrams)
+POJO layer n DAO layer i/f
+
+5. Please confirm this (MUST)
+5.1 JDK version MUST be JDK 11
+5.2 Eclipse STS version must be STS 3.9.18
+Otherwise you will face problems later
+If you are using any different versions , refer to core java help : 1st day installation instructions n fix it.
+
+6. Hands on
+ref table : my_emp
+Write JDBC application for : 
+6.1 Display emp details for all emps , earning salary > specified salary n joined before specified date.
+6.2 Update emp salary
+i/p : emp id n salary increment
+6.3 Delete emp details 
+i/p : emp id
+6.3 Add new emp details
+i/p : emp details (excluding emp id)

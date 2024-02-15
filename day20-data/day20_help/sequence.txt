@@ -1,0 +1,150 @@
+Day19 lab discussion
+
+Interesting lab question : what about protected routes ?
+Refer to Day19 lab assignment : Get All users 
+---------------------------
+Today's topics
+Revision
+Complete backend for Emp management n test it with postman n then front end (with Response Entity)
+
+Validations n global exc handling
+
+Magic of spring boot application
+
+Remaining topic from Spring MVC monolithic web app : 2 way data binding
+(ready made demo : day20_boot_cms , db : dac22  , copy DML from day1_help\jdbc help\sql\topics tutorials)
+
+Spring AOP
+--------------------------
+Revision
+1. Refer to a diags from day20-data\day20_help
+"Full Stack App Revision"
+"flow.png"
+2. readme : "day19-data\day19_help\REST related readmesRestController vs MVC Controller n Annotations.txt" 
+3. Revise CORS (from the same readme)
+(inspect option : look at response headers)
+
+
+Objective : Complete backend for Emp management front end
+
+1. Get All Employees : Already done !
+2. Add Emp Details : 
+Method : POST
+URL : http://host:port/api/employees
+Method : @PostMapping -- @RequestBody
+
+3. Delete Emp Details
+Method : DELETE
+http://host:port/api/employees/{id}
+
+
+4. Get Emp details by id
+5. Update Emp details 
+
+
+
+Enter  o.s.http.ResponseEntity<T>
+
+o.s.http.ResponseEntity<T>  : generic class
+T : type of the response body
+Replace actual Resource(eg : Emp/Topic/Product )  by ResponseEntity
+Standard design practice for back end : DO NOT directly send response body , instead wrap it in ResponseEntity
+o.s.http.ResponseEntity<T>
+Ctor : ResponseEntity(T body, HttpStatus status);
+OR Methods
+ResponseEntity.status(HttpStatus stsCode).body(T body)
+ResponseEntity.ok(T body)
+
+0. Add more data members in Employee POJO
+
+salary , joinDate , lastName (Treat earlier name as first name),password,email
+
+
+1. Server side Validations
+(refer : templates under ready code & "regarding spring boot exc handling n validations.txt")
+
+Add Validation rules on Employee
+first name : can't be blank .(min : 4 chars , max =20 chars)
+last name : can't be blank 
+valid email 
+valid strong password 
+salary in the range : 10,000 --50,000
+join date must be in future
+Test it with postman client
+(Same annotations are used in Spring MVC standalone App , in P.L validations)
+
+@Valid
+@Validated
+
+2. Any problems observed on the client side ??????
+
+Solution : 
+1 Add try-catch in req handling methods n send suitable err resp in Response Entity
+
+OR (better soln)
+
+Centralized (global) exc handling
+HOW ?
+Create a class in the base pkg : annotated with @ControllerAdvice 
+Add @ExcHandler anno over exc handling methods
+
+
+2.5 
+Instead of sending err mesg as a plain string , wrap it in Error response object n send it to the front end for simpler processing
+Enter DTO pattern : data xfer object 
+
+
+Refer to readme : regarding spring boot exc handling n validations.txt
+
+----------------------Pending------------------------
+Spring boot magic explained : 
+Important components of a Spring Boot Application
+
+Below is the starting point of a Spring Boot Application
+
+@SpringBootApplication
+public class HelloSpringBootApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(HelloSpringBootApplication.class, args);
+	}
+
+}
+About : org.springframework.boot.SpringApplication
+It's Class  used to bootstrap and launch a Spring application from a Java main method. 
+
+By default class will perform the following steps to bootstrap the application
+1. Create an ApplicationContext instance (representing SC)
+2. Manages life cycle of spring beans
+
+
+@SpringBootApplication - This is where all the spring boot magic happens.
+It consists of following 3 annotations.
+
+1. @SpringBootConfiguration
+It  tells spring boot  that this class here can have several bean definitions. We can define various spring beans here and those beans will be available at run time .
+
+2. @EnableAutoConfiguration
+It tells spring boot to automatically configure the spring application based on the dependencies that it sees on the classpath.
+
+eg:
+If we have a MySql dependency in our pom.xml , Spring Boot will automatically create a data source,using the properties in application.properties file.  
+
+If we have spring web in pom.xml , then spring boot will automatically create the dispatcher servlet n other beans (HandlerMapping , ViewResolver)
+
+All the xml, all the java based configuration is now gone.It all comes for free thanks to spring boot to enable auto configuration annotation. 
+
+3. @ComponentScan (equivalent to xml tag : context:component-scan)
+
+So this  tells us that spring boot to  scan through the classes and see which all classes are marked with the stereotype annotations like @Component Or @Service @Repository and manage  these spring beans . Default base-pkg is the pkg in which main class is defined.
+Can be overridden by
+eg : 
+@ComponentScan(basePackages = "com")
+For scanning entities :  (equivalent to packagesToScan)
+@EntityScan(basePackages = "com.app.pojos")
+-----------------------------------
+
+2 way data binding
+refer : day20_boot_cms
+Follow admin flow n readme : "regarding form binding.txt"
+

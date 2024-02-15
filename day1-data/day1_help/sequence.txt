@@ -1,0 +1,26 @@
+JDBC : Java DB connectivity
+
+What is it ? : API --java.sql --to allow prog --to connect to DB , CRUD , close connection
+
+Why : Allows prog : platform independence DB apps + DB vendor inde.
+
+JDBC allows only partial DB independence. 
+
+JDBC Driver
+
+JDBC sequence
+1. Establish DB connection
+2. Display all emp details from the db.
+solved using Statement API
+
+3. Display emp id , name , salary , join date of all emps from specific dept , joined between start n end dates
+IN / OUT / IN OUT : ?
+sql ="select empid,name,salary,join_date from my_emp where deptd=? and join_date between ? and ?"
+
+4. Solve Same objective : using DB layered architecture.
+4.1 DB Table : my_emp
+4.2 POJO Class : Employee
+4.3 DAO Layer i/f : IEmployeeDao
+4.4 DAO Layer implementation class : EmployeeDaoImpl
+4.5 DB Utils
+4.6 Tester 

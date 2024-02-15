@@ -1,0 +1,18 @@
+1. login to mysql db (either using workbench or cmd line client)
+
+2 From cmd line client , type : status OR from workbench check server status
+confirm user name n TCP port no
+
+3. From cmd line client : type
+show databases
+
+
+4. Extract eclipse project : day1.1 n import it in your workspace.
+
+5. Fix build path to contain mysql connector JAR
+
+6. Edit DBUtils as per your db credentials (user name n password)
+
+6. Run the Tester : TestConnection.java
+Should show you the o/p
+connected to DB com.mysql.cj.jdbc.ConnectionImpl@hashcode 

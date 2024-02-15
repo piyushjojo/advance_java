@@ -1,0 +1,633 @@
+Advanced Java 
+Day 3.
+1. Revise JVM architecture
+
+2. Create new workspace for advanced java.
+
+3. import day1.1 , edit build path n DB credentials from DBUtils n revise JDBC steps
+
+4. import day1.2 , edit build path n DB credentials from DBUtils n revise beginning of layered architecture. (refer to diagrams)
+POJO layer n DAO layer i/f
+
+5. Please confirm this (MUST)
+5.1 JDK version MUST be JDK 11
+5.2 Eclipse STS version must be STS 3.9.18
+Otherwise you will face problems later
+If you are using any different versions , refer to core java help : 1st day installation instructions n fix it.
+-------------------------------
+6. Hands on
+ref table : my_emp
+Write JDBC application for : 
+6.1 Display emp details for all emps , earning salary > specified salary n joined before specified date.
+6.2 Update emp salary
+i/p : emp id n salary increment
+6.3 Delete emp details 
+i/p : emp id
+6.4 Add new emp details
+i/p : emp details (excluding emp id)
+Hint : sql="insert into my_emp values(default,?,?,?,?,?)";
+
+Day 4
+1. Before revision , if you not yet added Tomcat server 
+1.1 Add tomcat server in IDE
+1.2 Create dynamic web project , create index.html n test it.
+
+2. import day4.1 as , Java SE project n revise
+2.1 Layered Architecture
+Tester --DAO (uses DBUtils) --POJO --DB
+2.2 Execution of the stored procedure
+
+3. import day4_web as dynamic web project n revise the folder structure n request-response flow
+
+4. Hands on (will be discussed with lab faculty)
+4.1 Copy voters n candidates tables from today's help.
+(refer : "day4-data\day4_help\my_sql_cmds_voting.txt"
+
+4.2 Refer to : "day4-data\day4_help\case studies\voting assignment.png"
+
+
+
+4.3 Prepare Tester --DAO(uses DBUtils)--POJO for the following , in bottoms up manner.
+1. Voter/Admin authentication
+2. Get candidate list.
+3. Update Voting status
+4. Increment chosen candidate's votes.
+Steps
+1. Create new java project : day4_jdbc_lab ( add my sql connector jar)
+2. Copy DBUtils
+3. Voter/Admin authentication
+3.1 Create Voter POJO
+Hint : votingStatus : boolean
+3.2 IVoterDao 
+Voter authenticateUser(String name ,String password) throws SqlExc;
+3.3 VoterDaoImpl
+1 state : cn pst1
+2. ctor : open cn , pst1=.....
+3 clean up : close --pst1 ,cn
+4 CRUD : 
+Voter authenticateUser(String name ,String password) throws SqlExc;
+set IN params
+exec query ---> RST --> process RST --> if (rst.next) ---> Voter pojo --> ret
+in case of failue --ret null.
+
+3.4 Tester -- create dao instace --invoke method--clean up
+
+
+4. Get candidate list.
+4.1 Candidate POJO
+4.2 ICandidateDao
+List<Candidate> fetchAllCandidates() throws SqlExc;
+
+5. Update Voting status
+Add another method in IVoterDao 
+String updateVotingStatus(int voterId/name) throws SqlExc;
+
+6.Increment chosen candidate's votes.
+Add another method in ICandidateDao
+String incrementVotes(int candidateId) throws SqlExc;
+
+NOTE : 
+If required : do refer to this primer in TCP/IP in web programming
+https://www.techtarget.com/searchnetworking/definition/TCP-IP#:~:text=TCP%2FIP%20stands%20for%20Transmission,(an%20intranet%20or%20extranet).
+
+
+Day 5
+1. import day5.1 in your workspace , as existing Project in workspace.
+Edit DBUtils , user name n password
+
+Open index.html n trace all the links , to revise
+1.1 Servlet life cycle
+1.2 Deployment using annotations as well as xml tags
+1.3 Servlet JDBC integration
+1.4 Reading request parameters.
+1.5 Centralized exc handling in servlets (ServletException)
+
+2. What will happen ? (Very important .... Try it out ) Play with the code !
+We will discuss your observations , on Monday morning.
+
+2.1  Add "/hello" in anchor tag's href from index.html .Observe n conclude
+URL : http://localhost:8080/hello
+Resp : HTTP 404 (due to missing ctx path!)
+
+
+2.2 Remove / from the url-pattern (in the @WebServlet annotation) . Observe n conclude
+Observation : App will reload : with the exc : IllegalArgExc : invalid url pattern !
+
+2.3  Give same url-pattern to 2 different servlets . Observe n conclude
+Observation : Web server fails to start --ambiguity 
+2 servlets CAN NOT be mapped to the SAME url pattern !
+(exc : IllegalArgExc : same url pattern)
+
+
+2.4 Can one servlet be deployed under multiple url patterns ??? YES
+How : either in @WebServlet OR xml tags
+
+
+Common Troubleshooting Tips , in case  web server or your web app is not working correctly.
+0. From Project menu : Build automatically should be checked 
+1. Stop web server
+2. R Click on Tomcat server --- add n remove --Remove All : This will un deploy all web apps from the server.
+3. R Click on Tomcat server --clean
+4. R Click on Tomcat server --clean tomcat work directory
+5. Start server (If it starts correctly => no server issues!)
+6. Clean Project n deploy the dynamic web project n test it.
+7. After deploying the project , if you are getting HTTP 404 , on the client side --check if you have added a welcome page correctly under the root of web app(i.e under src/main/webapp)
+
+
+3. Hands on
+Start with voting case study , in day5_lab eclipse project n complete voter authentication part from scratch , as practice.
+
+
+Day 6
+1. import day6.1 , to revise
+send redirect (client Pull) n  cookie based session management
+
+2. import day6.2 , to revise 
+send redirect (client Pull) n , HttpSession based session management
+CMS case study.
+
+3. Complete pending objectives 
+
+4. Today's hands on
+Continuation of voting case study.
+(Use HttpSession for session management)
+
+Check
+1. DBUtils 
+2. Voter n Candidate POJOs
+3. Voter n Candidate  DAOs 
+-------------------
+4. day6_voting
+5. web.xml : welcome-file : login.html
+6. AuthServlet (for user authentication + authorization)
+init : open cn , create voter n candidate daos
+destroy : daos clean up , close cn
+doPost : set cont type , get PW , get req parameters ,invoke voter dao's method for auth
+null : err mesg n retry link
+not null => valid login
+get session , store validated user details n daos in session scope(setAttribute) ,
+chk role ---voter --- chk voting status --- true => voted alrdy voted --> redirect clnt --> status page
+chk voting status --- false => voted not yet voted --> redirect clnt --> candidate list page
+
+role --admin --> redirect clnt to admin page
+
+7. Candidate List : servlet
+doGet : set cont type , get PW , get HttpSession
+Retrieve : user details , candidate dao from session scope(getAttribute)
+invoke  candidate dao's method to fetch all candidates
+dyn form generation
+form , radio btns(label : candidate name n party) , submit btn
+
+
+8. Status Page 
+doGet -- set cont type , get PW , get HttpSession
+Retrieve from HttpSession --voter details 
+voter --chk status -- false => not yet voted 
+get , voter dao , candidate dao : from http session (get attribute)
+voter dao : update voting status (voter id : voter.getId : session)
+candidate dao : incr votes (candidate id : req.getParameter)
+mesg : casted a vote ! => success mesg
+
+voter --chk status -- true => already voted
+mesg --you have already voted , can't vote again!!!!!!!!
+
+In either of above case : session.invalidate()
+
+
+Day 7
+
+1. import day7_cms  ,to revise  CMS case study for  customer role
+
+2. import day7.1 to revise Server pull(Request Dispatcher's  forward scenario)
+
+3. import day7.2 to revise Server pull(Request Dispatcher's  include scenario)
+
+4. import day7.3 to revise  ServletConfig API n DB independent web app.
+
+5. Try to complete voting case study with voter's role.
+
+
+Day 8
+ 1. import demo of config vs ctx (day7-data\day7_help\demo of config_vs_ctx\config_vs_ctx)
+to check the difference between them
+
+2. import day8.1 n refer to web app listeners , from 
+day8.1\src\main\java\listeners\MyListener.java
+
+3. import day8.2 , open index.jsp --trace all links , to understand basic JSP syntax
+
+4. MANDATORY 
+Complete voting case study with voter's role , with lab faculty's help
+
+5. Today's hands on
+Refer : day8-data\JSP Assignment.png n solve it.
+
+Day 9
+1. import day9.1 n just trace all the links in index.jsp , to revise : 
+1.1 solution of JSP assignment 
+1.2 URL rewriting 
+1.3 err handling in JSP
+1.4 JSP actions (RequestDispatching related)
+
+
+2. import day9.2 , to revise
+JSP -- Javabean --DAO --POJO --DB layered architecture.
+
+3. Hands on (solve with the help of lab faculty)
+Refer to flow diagram : JSP-JB-assignment
+Steps
+1. Create separate project : day9_assgn
+2. products table;
+create table products(id int(5) primary key auto_increment,name varchar(20) unique, category varchar(20),price double, exp_date date,description varchar(200));
+3. Product POJO
+4. Copy DBUtils n ctx listener to open n close cn
+5. DAO : IProductDao
+5.1 String addNewProduct(Product p) ....
+List<Product> getAllProducts() ....
+5.2 Create imple class
+
+6. Create Product Bean 
+6.1 state : String name, String category, double price, String expiryDate, String description + dao
+6.2 def ctor 
+dao instance
+6.3 setters n getters
+6.4 B.L
+1. add new product : 
+Product new Prodcut=new Product(all args except id);//string ---> Date (Date.valueOf)
+dao.addNewProduct(productDetails);
+
+2. get all products
+
+7. process form .jsp
+<jsp:useBean>
+<jsp:setProperty>
+${...}
+
+
+Day 10
+
+1. MANDATORY
+import day10_hibernate , as "Existing Maven Project" ,  in your workspace (with stable internet connection) n confirm if all maven dependencies (hibernate related dependencies) have been downloaded.
+(Take Faculty help , if needed !)
+
+2. import day10_cms , as existing java project , in your workspace . Trace entire flow , including 
+JSP using JSTL , Java Beans , DAO , POJO n DB
+
+
+Hands on : 
+
+3. Complete logout part from the CMS case study
+3.1 logout.jsp
+1. Hello , username 
+2. all dao's cleanup 
+How ? ${sessionScope.user.userDao.cleanUp()}
+similarly for other daos.
+3. invalidate session 
+4. visit again link
+
+
+4. Complete Day 9 assignment (JSP Java Bean based)
+4.1 Add DAO layer method to get all products
+4.2 Add B.L method in the Product bean
+4.3 From display.jsp , invoke bean's method , use <c:forEach> to display product details in JSP.
+
+
+5.Optional Lab exercise
+Make this CMS web app , completely cookie independent .
+Hint 
+JSTL tags 
+<c:redirect> : already used in the code --for Clnt Pull II
+BUT links n form actions (CP I) is not YET updated for URL encoding .
+How to ?
+JSTL tag :
+eg : import tag lib
+<c:url var="logout_url" value="logout.jsp"/>
+<a href="${logout_url}">Log Out</a>
+What will be the URL , in case of blocked cookies, after cln click on the logout link ?
+http://host:port/cms/logout.jsp;jsessionid=fgw567356gjdgh
+
+What will be the URL , in case of acceptd cookies, after cln click on the logout link ?
+http://host:port/cms/logout.jsp
+
+Form action : also same ! 
+Simply pass the form's action , through <c:url> n your whole app will be cookie less !
+
+
+Tip : Optionally , if you want to set default value to visits as 0  , in DB itself 
+
+alter table tutorials alter column visits int set default 0;
+
+6. Optionally , for more practice of JSTL tags (conditional rendering of the dyn contents)
+refer to : admin.jsp (from eclipse project : day10_cms_lab)
+Tags : <c:choose> , c:when , c:otherwise
+(equivalent to switch-case)
+
+
+After lab session , Reading H.W
+Go through "readme maven.txt"
+
+Day 11
+
+1. import day11_hibernate , as existing Maven project. Edit hibernate.cfg.xml , as per your DB settings
+n test CRUD operations(Tester ---Hibernate based DAO --Hibernate managed entities --Hibernate Utils --DB)
+
+Day 12
+1. import day12_hibernate as existing Maven project. Edit hibernate.cfg.xml , as per your DB settings
+n test CRUD operations , along with JPQL , Updates , bulk processing , deletions(Tester ---Hibernate based DAO --Hibernate managed entities --Hibernate Utils --DB)
+Refer to Dao I/F for the sequence
+
+2. import day12_web_maven_hibernate as existing Maven project.
+Refer to earlier voting assignment . Replace JDBC based DAO n POJOs by hibernate .
+Test integration of web app with hibernate.
+(Complete it with lab faculty)
+
+3. Can optionally write JUnit test cases , to test the DAO layer first in the web app.
+(Complete it with lab faculty)
+
+
+Day 13
+1. import day13_hibernate_advanced in your workspace , as existing maven project.
+Edit hibernate.cfg.xml as per DB settings
+Revise
+1.1 Many to One uni dir relationship between Tutorial ---> Topic
+1.2 One to One uni dir relationship between Address ---> User
+1.3 Revise all annotations 
+(Hint : solve testers)
+
+2. Hands on (with lab faculty's  help)
+2.1 Display all tutorial titles written by specified author , published after specific date
+I/P : author first n last name , date
+Steps 
+1. Add method : ItutorialDao
+List<String> getTutorialTitlesByAuthorAndDate(String fName ,String lName,LocalDate date);
+2. Tut DAO impl
+jpql="select t.title from Tutorial t where t.author.firstName=:fn ........" => cross join
+OR 
+jpql="select t.title from Tutorial t join t.author a where a.firstName=:fn ........"
+
+session.createQuery(...).set named IN params . get result list
+Test it with tester.
+
+
+2.2 Display  title n publish date of all the tutorials whose contents contain specific keyword
+I/P : keyword
+Steps
+1.Tut dao
+List<Tutorial> getByKeyword(String keyword);
+2. Tut dao impl
+jpql="select new pojos.Tutorial(title,publishDate)  from Tutorial t where t.contents like :key";
+tuts=session.crQuery(...).setParameter("key","%"+keyword+"%").....
+
+2.3 Display all topics containing tutorials authored by specific author(last name)
+I/P : author name
+1. TopicDao 
+List<Topic> getTopicsByTutAuthorLastName(String lastName);
+jpql="select t.topic from Tutorial t join t.author a where a.lastName=:nm";
+
+2.4 Display all user details staying in a specific city
+i/p : city
+1. Add a method : User Dao
+List<User> getByAddressCity(String city);
+
+2. DAO impl
+jpql="select a.owner from Address a where a.city=:city"
+
+2.5 Display user n address details
+i/p : adr id
+1. Adr Dao
+Address getUserAndAddressDetails(long adrId);
+Impl
+Address adr=session.get(...);
+null chking reqd
+not null --adr : PERSISTENT (since def fetch type : eeger --it will lift user details ! : 2 select queries)
+
+OR
+JPQL with join fetch.
+
+2.6 Update user address (Optional work)
+i/p adr id , new adr line1 , adr line 2 , city , zipcode 
+o/p message.
+
+2.7 Food for thought !!!!!!!!(OPTIONAL)
+In one-to-one mapping between User n Address , to solve 2.5 n 2.6 , what will be logically correct i/p ?
+User Id or Address Id ?
+
+Will be discussed tomorrow....
+
+2.8 Observ n conclude
+What will happen if user tries to add address again ?
+Any exceptions ? NO
+Hibernate will happily assign multiple addresses to a single user , which IS NOT working as one-to-one mapping at all !!!!!!
+
+Suggested soln : Check this in B.L layer (the lyaer above DAO , eg : Java Bean)
+If the address is alrdy assigned , give err mesg to the user , prompting him --with a link / btn 
+Update Address ?
+Allow updation of the existing address , through : update address form .
+
+3. Create web app with maven n hibernate
+(import day12_web_maven_hibernate as existing Maven project , as starting point)
+
+Create a suitable front end using JSP Java beans for the following
+
+Create index page with the following link
+3.1 User Registration
+3.2 Assign address details
+3.3 Display user details containing address details
+
+
+Day 14
+1. import day14_spring in your workspace n confirm that all spring related maven dependencies are correctly downloaded.
+
+2. import day14_hibernate_advanced n revise
+2.1 Shared PK , using @MapsId , in one-to-one , uni dir mapping
+2.2 Many-to-many uni dir association between , User n Roles
+2.3 Bi dir one-to-many relationship between entities
+2.4 Entity vs Value Types n annoatations
+2.5 Different types of the value types 
+
+2.6 MUST Do !
+Complete integration of web app n hibernate , atleast for 
+3.3 Display user details containing address details.
+
+
+3. Optional Hands on
+3.1 Assign role to existing user
+i/p : user id n role id
+
+3.2 Add new comment.
+i/p : user id , tutorial id , comment text
+
+3.3 Delete tutorial
+i/p tutorial title 
+Confirm cascade on remove
+Steps
+jpql --> Tutorial tut
+session.delete(tut);
+What will happen , if you use bulk delete (delete jpql) on tut table ?
+
+3.4 Assign passport details to existing user
+i/p : user id n passport details
+
+3.5 Display user names for users having passport issued by specified country
+i/p : issuing country
+
+
+Day 15
+
+1. import these eclipse projects n revise spring bean life cycle n D.I
+1.1 import day15_spring , for basic understanding of spring bean life cycle n setter based D.I
+1.2 import day15_spring2 , for constr based D.I
+1.3 import day15_spring3 , for factory method based D.I
+1.4 import day15_spring4 for auto wiring by name.
+
+2. NO NEW assignments.
+Please complete all pending work , with the help of lab faculty.
+If you complete pending work , we can give you additional work later.
+
+Day 16
+1. import day16_spring1 for auto wiring by type
+2. import day16_spring2 for auto wiring by constructor
+3. import day16_spring3 for hybrid approach(lesser xml n majority annotations)
+4. import day16_spring4 for annotation config approach(zero xml)
+5. import day16_mvc_hibernate n understand MVC implementation w/o spring
+6. import day16_spring_mvc n understand MVC implementation with spring
+
+Hands on :
+7. MUST try creating spring MVC web project from scratch.
+(use discussed steps)
+
+8. Optional BUT Recommended
+Create many-to-many uni dir relationship between Tutorial n Tags (refer to E-R Diagram)
+The link table should have tut_id , tag_id , tags_created date.
+Composite PK : tut_id & tag_id
+How will you manage it ?
+
+Day 17
+
+1. import day17_spring_mvc to revise spring MVC basics
+1.1 Flow
+1.2 Model attributes 
+1.3 ModelAndView 
+1.4 Model Map
+
+2. From the same project :  revise the  integration of spring MVC n Hibernate
+Edit database.properties file from <resources> , as per your db settings.
+MUST : 
+Everyone should try spring MVC hibernate integration
+2.1  import blank template project :  spring_mvc_template project from day16 google drive.
+2.2 Follow integration steps n try authentication n role based authorization.
+
+3. MUST
+Either create spring starte project 
+OR
+import day17_boot 
+Pls confirm that all spring boor related dependencies are downloaded in maven local repo.
+
+
+(OPTIONAL)
+4. Refer to assignment1.png , from today's data
+Steps
+1. Copy from spring_mvc_template into day17_assignment
+2. Bottoms up approach
+3. Employee
+id name adr salary joindate + Department dept (@ManyToOne , @JoinColumn)
+
+Department 
+id , name , location
+
+4. Dept Dao --add method
+@Repository , SF : @AutoWired + @Transactional
+
+5. Emp Dao -- add method
+@Repository , SF : @AutoWired +  @Transactional
+
+6.You can skip service layer : no B.L
+
+7. Controller --- dependency : dao layer
+8. View Layer : JSPs
+ 
+
+Day 18
+0. Download postman  n keep it ready.
+(https://www.postman.com/downloads/)
+
+1. import day18_boot_cms , as existing Maven project.
+Revise , by tracing the flow in a top-down manner
+1.1 Spring Boot Application
+1.2 Redirect view
+1.3 Flash scope
+1.4 HttpSession management in spring MVC
+1.5 Porting DAO layer to JPA (no native hibernate !)
+1.6 Understanding Tx internals (@Transactional)
+
+2. Hands on
+Techonologies to use : Spring Boot MVC n JPA
+
+Options
+2.1 You can create above flow from scratch (customer role)
+OR
+2.2 You can start developing admin flow from scratch 
+Help : You can copy JSPs (view layer) from day10_cms_lab\src\main\webapp
+OR
+2.3 Solve Day 17 assignment using Spring Boot MVC n JPA
+req : http://host:port/day18_assgn
+
+OR
+
+2.4 Student Admission in the course
+Refer to : day13-data\day13_help\Alternate Student management system E-R diagram.png
+Above if for E-R reference
+(You will need to create Course *----* Student , many-to-many uni dir with extra columns : admission_date , status : enum : APPLIED,ADMITTED,REJECTED,CANCELLED)
+Will you need an additional link entity (eg : Admission) YES !
+eg : 
+Admission extends BaseEntity
+props : applicationDate , status(enum) , Course , Student
+
+index.jsp
+Links
+1. Add Course (admin role)
+Accept course details from the form  n insert a record in the "courses" table.
+
+2. Student Admission
+Accept student details n selected course from the form.
+Along with student details you can either accept marks secured in CET or can init student's educational qualification (check the latest qualification marks)
+Optionally can accept latest degree marks , as edu. qualifications.
+This should insert a parent rec in students table.(If you have edu qualifications table : it should insert a row there.)
+Then it should insert a child rec in the admissions table , linked to course_id n student_id (FKs)
+n status : inited to APPLIED.
+
+3. Admit or Reject Student (admin role)
+i/p : student id n course id
+Validate student's marks n available seats for the chosen course
+In case of success , change the admission status : ACCEPTED
+Reduce course's available capacity by 1.
+
+Day 19
+0. Refer to today's sequence.txt
+
+1. import day19_boot_cms , as existing maven project
+Refer to "customer" flow, as per our daily sequence
+
+2. Refer to diagrams n readmes , as mentioned in the sequence
+
+3. import day19_ems_backend , as existing maven project.
+Identify the changes between monolithic web app vs REST API provider(backend)
+
+4. Extract Sprind Data JPA api-docs n also open reference doc.
+(https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
+
+5. Go through methods of : CrudRepository n JpaRepository.
+Check it's usage in backend project.
+
+6. Test it with postman n then connect it with React front end.
+(Read : What is CORS ?)
+
+7. Install lombok jar , as explained n confirm it's working.
+
+
+
+
+
+
+
+

@@ -1,0 +1,114 @@
+0 Revise Basic Authentication using the Authorization Header
+
+
+1. JWT 
+Refer to JWT Steps
+
+2. Spring Data JDBC --exam objective
+
+3. Hibernate get vs load 
+Ref : day23-data\day23_help\diagrams
+
+3.1 eclipse project : day24.1 (hibernate Java SE project : get vs load)
+
+3.2 EntityManager : find(eager) vs getReference (lazy) : Try it out in day17_spring_mvc_hibernate
+Add a method : getUserDetails(long userId)
+First try it with find n then replace it with getReference . Spot the difference
+
+3.3 Spring Data JPA : JpaRepository methods findById vs getReferenceById (eclipse project : EMSNetBankingClnt)
+
+3.4 eclipse project : cms_backend
+Use case : adding tutorial in existing topic , existing user 
+(no need to chk if user is in author role --since one can use spring sec authorization rules --n don't allow the access)
+Earlier bug : FK constraint violation 
+Check if it's fixed  ????
+How many select queries it's firing ? 2
+Any possibility of improvement ? YES --replace findById(eager) by getRefById(lazy)
+
+Project Tip :
+Imp exception : org.springframework.http.converter.HttpMessageNotWritableException
+Reason Could not write JSON: 
+
+Root cause : could not initialize proxy - no Session
+
+nested exception is com.fasterxml.jackson.databind.JsonMappingException: could not initialize proxy 
+Triggers : getById or Any to Many association
+
+So after invoking non id getter in session scope --- REST clnt still gets an inited proxy 
+To avoid that , add global level setting in app.props file
+spring.jackson.serialization.FAIL_ON_EMPTY_BEANS=false
+
+
+3.5 Pagination n sorting will be added later n shared separately
+Refer to super i/f of JpaRepository : PagingAndSortingRepository
+Method : Page<T> findAll(Pageable pageable)
+Pageable <---- PageRequest
+Method of PageRequest :
+public static PageRequest of(int page,
+                             int size,
+                             Sort.Direction direction,
+                             String... properties)
+Creates a new PageRequest with sort direction and properties applied.
+
+
+
+---------------------
+
+4. Advanced transactions handling
+Refer :day23-data\day23_help\transactions\readmes\transactions.txt
+Transaction Configuration steps.txt
+
+4.1 Tx propagation demo
+refer to transaction propagation diagram
+eclipse project : spring-boot-tx-propagation
+DB : dac22
+Table : authors (will be auto created)
+
+in optimistic lock demo : run n chk the o/p properly!!!!!!!!!!!!!!!!!!
+
+4.2 Transaction isolation levels
+Vlad's articles
+Lost Update problem n solution
+First run the test case w/o concurrency n then with concurrency
+eclipse project : spring-boot-optimistic-locking
+
+5. Spring Boot Testing 
+eclipse project : spring-boot-testing
+DB : dac22
+Table : product (will be auto created)
+5.1 Named Query , check entity , repo , service layer n then test case for service layer
+TestProductService --add products , test named query
+
+5.2 Criteria Query : extremely advanced example (for dynamic searching)
+eg scenario : Client want to find products either based on name or price or expiry 
+These are selected by client , using front end drop down list with different search options set --->
+how to handle it in the backend ?
+Ans : Criteria Queries
+
+5.3 Integration test (end to end : simulating RestTemplate)
+RestControllerTestWithServer.java
+
+
+6. Hibernate inheritance
+
+7. JPA/Hibernate inheritance strategies
+Refer to readme n demos
+
+8. I18N
+refer to readme n demos
+test_i18n (Java SE project)
+spring-boot-mail : maven project
+----------------------------
+9. Eclipse project : spring boot bookstore : contains composite PK demo
+
+10. Additional technique of D.I
+Lookup method injection -- will be shared later as ready demo .
+
+
+11. Full stack demo
+front end : can replace sessionStorage by localStorage
+Replace class style components by functional comps + hooks
+
+12. Good links
+https://thorben-janssen.com/ultimate-guide-derived-queries-with-spring-data-jpa/
+https://thorben-janssen.com/spring-data-jpa-query-annotation/

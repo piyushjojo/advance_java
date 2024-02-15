@@ -1,0 +1,23 @@
+Req resp flow in CMS
+1. http://host:port/day6.1
+resp : index.html 
+
+2. After user clicking login link
+ http://host:port/day6.1/login.html
+resp : login.html
+
+3. After user submits login form 
+ http://host:port/day6.1/validate
+resp in case invalid login : err mesg n retry link
+resp in case valid login : success mesg n user details
+Above will be replaced by 
+redirect resp : SC 302 | location n Set-Cookie headers | Body : Empty
+
+4. Redirect req , for customer login
+http://host:port/day6.1/topics
+resp : topics page (showing available topics)
+
+5. After user chooses a topic
+Req : http://localhost:8080/day6.2/tutorials?tid=4
+
+

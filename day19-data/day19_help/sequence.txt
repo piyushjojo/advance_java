@@ -1,0 +1,94 @@
+Today's topics
+Complete Customer Flow
+Enter REST
+Concept n implementation
+Spring Data JPA
+
+Revision
+1. http://host:port/day19_boot_cms
+DS --> H.M --> IndexController.showHomePage 
+resp : index.jsp
+
+2. Clnt clicks on this link
+<a href="<spring:url value='/user/login'/>">User Login</a>
+Next URL (cookies are enabled) : http://host:port/day19_boot_cms/user/login
+Next URL (cookies are disabled): http://host:port/day19_boot_cms/user/login;jsessionid=fgh357hdfgf
+DS --> H.M --> UserController.showLoginForm
+Resp : /WEB-INF/views/user/login.jsp
+
+3. After clnt submits the form
+req URL : http://host:port/day19_boot_cms/user/login , method=POST
+DS --> H.M --> UserController.processLoginForm
+In case of invalid login : forward --> login.jsp , with err mesg
+Admin login : user controller --> redirect:/admin/status -->D.S --> sends temp redirect resp to clnt
+
+Author login : user controller --> redirect:/author/success -->D.S --> sends temp redirect resp to clnt
+Customer login : user controller --> redirect:/customer/topics -->D.S --> sends temp redirect resp to clnt
+
+4. IN case of successful cust login 
+clnt browser : http://host:port/day19_boot_cms/customer/topics
+D.S --> H.M --> CustomerController.showTopics --> gets topics from DAO layer
+Resp : topics.jsp
+
+5. After clnt chooses a topic (eg : spring , with topic id=10)
+req : http://host:port/day19_boot_cms/customer/tutorials?topicId=10
+--> D.S --> H.M -->CustomerController.showTutorialTitles
+resp : tutorials.jsp
+
+
+DML : 
+
+insert into tutorials values(default,'Explains D.I n AOP in detail','2020-1-1','Spring Core',10,2,1);
+
+insert into tutorials values(default,'Explains Spring MVC in details ','2020-11-21','Spring MVC Flow',13,2,1);
+
+insert into tutorials values(default,'Explains Spring AOP in details ','2020-11-21','Spring AOP Flow',20,2,1);
+
+
+6. Req after choosing a tut 
+http://localhost:8080/day19_boot_cms/customer/tut_details?tut_name=Spring%20MVC%20Flow
+D.S ---> H.M --> null
+
+7. After user clicks on logout link
+http://localhost:8080/day19_boot_cms/user/logout
+D.S --> H.M -- > null
+-----------------------------
+
+REST concepts
+
+refer to : 
+Diag : web app vs web service
+Diag : Full Stack Development
+Readmes from : day19-data\day19_help\REST related readmes\
+1. REST Simplified,txt
+2. RestController vs MVC Controller n Annotations.txt
+
+Implementation Steps
+1. Create spring boot app : using spring boot starter project (choose packaging as JAR)
+2. Use same spring boot starters as earlier.
+Spring web , Mysql driver , Spring data JPA , Lombok , Spring Dev Tools,validation
+3. NO additional dependencies for view layer(i.e no jstl n no tomcat-embeded jasper  dependencies , in pom.xml
+
+4. Copy application.properties from earlier spring boot project
+(Do not add view resolver related properties)
+
+5. Build the layers in bottoms up manner, for the following objectives.
+
+Objective : Complete backend for Emp management front end
+
+1. Get All Employees : 
+Later Use ResponseEntity , to wrap response body + response headers.
+DML
+insert into employees values(default,'RnD','Pune','Rama Parekh');
+insert into employees values(default,'RnD','Pune','Mihir Mujumdar');
+insert into employees values(default,'Finance','Mumbai','Kiran Sethi');
+insert into employees values(default,'HR','Delhi','Prateek Kher');
+
+-----------------------Pending--------------------------------
+2. Add Emp Details : 
+3. Delete Emp Details
+4. Get Emp details by id
+5. Update Emp details 
+
+
+Test it with postman & then with React front end.

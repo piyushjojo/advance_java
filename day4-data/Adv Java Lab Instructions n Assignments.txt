@@ -1,0 +1,53 @@
+Advanced Java 
+Day 3.
+1. Revise JVM architecture
+
+2. Create new workspace for advanced java.
+
+3. import day1.1 , edit build path n DB credentials from DBUtils n revise JDBC steps
+
+4. import day1.2 , edit build path n DB credentials from DBUtils n revise beginning of layered architecture. (refer to diagrams)
+POJO layer n DAO layer i/f
+
+5. Please confirm this (MUST)
+5.1 JDK version MUST be JDK 11
+5.2 Eclipse STS version must be STS 3.9.18
+Otherwise you will face problems later
+If you are using any different versions , refer to core java help : 1st day installation instructions n fix it.
+-------------------------------
+6. Hands on
+ref table : my_emp
+Write JDBC application for : 
+6.1 Display emp details for all emps , earning salary > specified salary n joined before specified date.
+6.2 Update emp salary
+i/p : emp id n salary increment
+6.3 Delete emp details 
+i/p : emp id
+6.4 Add new emp details
+i/p : emp details (excluding emp id)
+Hint : sql="insert into my_emp values(default,?,?,?,?,?)";
+
+Day 4
+1. Before revision , if you not yet added Tomcat server 
+1.1 Add tomcat server in IDE
+1.2 Create dynamic web project , create index.html n test it.
+
+2. import day4.1 as , Java SE project n revise
+2.1 Layered Architecture
+Tester --DAO (uses DBUtils) --POJO --DB
+2.2 Execution of the stored procedure
+
+3. import day4_web as dynamic web project n revise the folder structure n request-response flow
+
+4. Hands on (will be discussed with lab faculty)
+4.1 Copy voters n candidates tables from today's help.
+(refer : "day4-data\day4_help\my_sql_cmds_voting.txt"
+
+4.2 Refer to : "day4-data\day4_help\case studies\voting assignment.png"
+
+4.3 Prepare Tester --DAO--POJO for the following , in bottoms up manner.
+1. Voter/Admin authentication
+2. Get candidate list.
+3. Update Voting status
+4. Increment chosen candidate's votes.
+

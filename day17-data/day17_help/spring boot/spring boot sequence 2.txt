@@ -1,0 +1,151 @@
+Steps in Spring Boot
+
+If you are using Spring Boot for creating spring MVC web app (view layer)
+1. pom.xml : Add 2 dependencies for : tomcat-embed-jasper & JSTL
+
+<dependency>
+ <groupId>org.apache.tomcat.embed</groupId>
+ <artifactId>tomcat-embed-jasper</artifactId>
+</dependency>
+		
+<dependency>
+ <groupId>javax.servlet</groupId>
+ <artifactId>jstl</artifactId>
+</dependency>
+
+For Oracle DB
+<dependency>
+    <groupId>com.oracle.database.jdbc</groupId>
+    <artifactId>ojdbc8</artifactId>
+    <version>19.6.0.0</version>
+</dependency>
+
+For P.L validations : Add 
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+	
+
+
+
+2. Edit : application.properties
+
+#Tomcat server port number 8080
+#server.port=7070
+#context path default value / (space)
+#server.servlet.context-path=/test_boot
+#DB properties
+spring.datasource.url=jdbc:mysql://localhost:3306/test_acts?useSSL=false
+spring.datasource.username=root
+spring.datasource.password=root
+# JPA properties
+spring.jpa.show-sql = true
+spring.jpa.hibernate.ddl-auto = update
+#spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5Dialect
+#logging.level.org.springframework.orm.hibernate5=DEBUG
+
+# Spring MVC ViewResolver related
+spring.mvc.view.prefix=/WEB-INF/views
+spring.mvc.view.suffix=.jsp
+
+
+
+3.Create  folders : below src/main
+webapp/WEB-INF : to add view layer.
+
+4. Replace SF.getCurrentSession : EntityManager (@PersistenceContext OR @AutoWired)
+
+5. Complete vendor flow
+6. admin flow 
+
+Tx management internals
+
+PRG pattern(Post-redirect-get pattern)
+--- to avoid multiple submission issue in a web app.
+Replace forward view(server pull) by redirect view (clnt pull) --a.k.a double submit guard.
+
+How to replace default forward view by redirect view in spring MVC ?
+Ans -- use redirect keyword.
+eg : return "redirect:/vendor/details";
+D.S invokes response.sendRedirect(response.encodeRedirectURL("/vendor/details"));
+Next request from clnt --- ..../vendor/details
+
+
+How to remember user details till logout?
+Ans : add them in session scope.
+How to access HttpSession in Spring?
+Using D.I
+How  -- Simply add HttpSession as method argument of request handling method.
+
+
+How to remember the details(attributes) till the next request (typically required in PRG --redirect view)
+Ans -- Add the attributes under flash scope.
+(They will be visible till the next request from the same clnt)
+How to add ?
+Use i/f -- o.s.w.s.mvc.support.RedirectAttributes
+Method
+public RedirectAttributes addFlashAttribute(String attrName,Object value)
+
+How to access them in view layer in the next request?
+via request scope attributes.
+
+
+eg : In case of successful login --save user details under session scope(till user log out) & retain status mesg only till the next request.
+In case of invalid login --save status under request scope.
+
+
+How to take care of links(href)/form actions + add URL rewriting support ?
+1. Import spring supplied JSP tag lib.
+(via taglib directive)
+prefix ="spring"
+
+2.  Use the tag.
+<a href="<spring:url value='/user/logout'/>">Log Out</a>
+ / --- root of curnt web app.
+
+
+What will be the URL if cookies are enabled ?
+http://host:port/spring_mvc/user/logout
+
+What will be the URL if cookies are disabled ?
+http://host:port/spring_mvc/user/logout;jsessionid=egD5462754
+
+OR form action example
+eg : <form action="<spring:url value='/admin/list'/>"> .....
+</form>
+
+From Logout 
+1. Discard session
+2. Forward the client to logout.jsp
+
+How to auto navigate the clnt to home page after logging out after some dly ?
+Ans : By setting refresh header of HTTP response.
+
+API of HttpServletResponse
+public void setHeader(String name,String value)
+
+name --- refresh
+value --- 10;url=any url you want to redirect to (eg : home page url (root of web app))
+10 : delay in seconds
+
+How to get the root of curnt web app ?
+API of HttpServletRequest
+String getContextPath()
+
+What will happen if any controller returns redirect view name to D.S ?
+eg : UserController -- return "redirect:/admin/list"
+D.S skips the V.R & sends temp redirect response to the clnt browser.
+How ?
+D.S invokes --- response.sendRedirec(response.encodeRedirectURL(".../admin/list");
+So clnt browser will send a next request ---with method=get
+URL --
+http://host:port/spring_mvc/admin/list
+
+
+Complete Admin Flow
+1. List Vendors
+2. vendor deletion
+3. Add New Vendor
+4. Update
+

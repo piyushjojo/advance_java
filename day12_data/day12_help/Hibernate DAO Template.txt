@@ -1,0 +1,12 @@
+//get session from SF
+		Session session=getSf().getCurrentSession();
+		//begin tx
+		Transaction tx=session.beginTransaction();
+		try {
+			
+			tx.commit();
+		} catch (RuntimeException e) {
+			if(tx != null)
+				tx.rollback();
+			throw e;
+		}

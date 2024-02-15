@@ -1,0 +1,11 @@
+1. @SpringBootApplication  : is added on the main class , in spring boot application , to run it as a standalone JAR / WAR
+
+@SpringBootApplication =
+
+1.1 @Configuration: Tags the class as a source of spring bean definitions for creating the application context.
+
+1.2 @EnableAutoConfiguration: Tells Spring Boot to start adding beans based on classpath settings, other beans, and various property settings.
+
+1.3 @EnableWebMvc: Marks the application as a web application and activates setting up a DispatcherServlet , HandlerMapping , ViewResolvers .  Spring Boot adds it automatically when it sees spring-webmvc on the classpath.
+
+1.4 @ComponentScan: Tells Spring to look for other components, configurations, and services in the the com.app & sub packages.

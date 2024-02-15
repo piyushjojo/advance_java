@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- configure dependency beans -->
+	<!-- singleton n lazy -->
+	<bean id="test" class="dependency.TestTransport" lazy-init="true" />
+	<!-- prototype lazy -->
+	<bean id="myTransport" class="dependency.HttpTransport" scope="prototype" />
+	<!-- singleton eager -->
+	<bean id="soap" class="dependency.SoapTransport" />
+	<!-- dependent singleton eager -->
+	<bean id="my_atm" class="dependent.ATMImpl" init-method="anyInit"
+		destroy-method="anyDestroy" autowire="constructor" />
+</beans>

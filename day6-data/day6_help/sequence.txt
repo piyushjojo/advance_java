@@ -1,0 +1,62 @@
+Today's Topics
+1. 
+Revision (through diagram n later with code)
+2. Page Navigation
+3. Session Tracking
+
+ 
+Revision
+
+
+Servlet Job list
+1. Request processing
+2. B.L 
+3. Dynamic response generation
+4. Data access logic(DAO class --managing DAO layer)
+5. Page navigation
+
+
+LoginServlet --in case of successful login
+Add/store :
+user details n dao instances under the session
+
+
+Objective : Continuation of the CMS case study
+1. Topics page
+1.1 DB table : topics
+1.2 POJO : Topic
+1.3 DAO i/f
+ITopicDao
+List<Topic> getAllTopics() throws SE
+1.4 DAO impl class
+1.5 Topic Servlet
+init :  no need
+destroy :  no need
+doGet : get HttpSession , retrieve --dao /user dtls --continue to B.L
+invoke dao's method n get topic  list
+
+Dynamic form generation
+
+<form action='tutorials'>
+for -each (topic list)
+ <input type='radio' name='topicId' value='topic id'> topic name
+<submit btn>
+</form>
+
+
+2. URL after choosing a topic
+http://localhost:8080/day6.2/tutorials?tid=4
+DB table : tutorials
+POJO : Tutorial
+DAO
+Tutorials Servlet
+
+
+
+
+
+
+
+
+
+

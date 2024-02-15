@@ -1,0 +1,31 @@
+Steps in Eclipse IDE for creating a Maven based dynamic web app with Hibernate n MySql 
+
+1. Choose File --New (or from drop down list) --Maven project --Create a simple project (no archetype)--finish
+Choose packaging as "war"
+
+2. Copy entries from pom.xml (from earlier hibernate project , eg : day10.1)
+Copy this additional entry for web app (WAR file creation)
+
+<plugin>
+ <artifactId>maven-war-plugin</artifactId>
+ <version>3.0.0</version>
+ <configuration>
+  <warName>artifact-id</warName>
+ </configuration>
+</plugin>
+
+3. R click on project --maven --update project (Force update!)
+
+4. R click on project --Java EE Tools -- Generate Deployment Descriptor stub
+(It will add web.xml under WEB-INF)
+Edit web app version from 2.5 to 3.1
+
+5. R click on project --properties --targeted runtime -- Choose Apache Tomcat 9.0--finish
+
+6. In case of any errors , choose Project tab at the top ---clean project 
+
+7. Confirm if JDK version updated to JDK 11 & dependencies are added.
+
+8. Write index.jsp , with changing timestamp.
+
+R Click on project --Run as --run on server --choose Tomcat server --finish

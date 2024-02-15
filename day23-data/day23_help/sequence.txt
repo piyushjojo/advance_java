@@ -1,0 +1,45 @@
+0. Servlet Filters
+
+1. Revise n Continue with Spring security : Basic Authentication 
+
+Add these conditions in Product controller
+Any Authenticated user(any role)  can browse through the categories
+Only admin should be able to delete a product	
+
+
+
+1.5 @DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+
+DML
+#pwd : 12345 : admin role
+insert into users values(default,'rama@gmail.com','Rama','Patil','$2a$12$yKmOzBOt4RO6dE8Suqcqfucfz2I3fKBQxL1QV4KAxnV1.MYiREj2C',3);
+#pwd : abc2345 : customer role
+insert into users values(default,'kiran@gmail.com','Kiran','Seth','$2a$12$ME.XrQKylqEm6iTOIUMmuuWABNIM1NkIe4wX.EfdJp60r4Qssbcre',2);
+#pwd : xyz3456 : user role 
+insert into users values(default,'anish@gmail.com','Anish','Raje','$2a$12$nwQsIFTdQbM.uLJDju.QdOJCOqdQzrwKdPzfjGFecSjndVrrTeIYe',1);
+
+
+insert user details in db directly or user reg service
+
+2. Spring Data JDBC --exam objective
+
+3. Hibernate get vs load 
+EntityManager : find(eager) vs getReference (lazy)
+Spring Data JPA : JpaRepository methods findById vs getById (eclipse project : )
+use case : adding tutorial in existing topic
+(later with cms case study)
+
+Project Tip :
+Imp exception : org.springframework.http.converter.HttpMessageNotWritableException
+Reason Could not write JSON: 
+
+Root cause : could not initialize proxy [com.app.pojos.Employee#17] - no Session
+
+nested exception is com.fasterxml.jackson.databind.JsonMappingException: could not initialize proxy 
+Triggers : getById or Any to Many association
+
+So after invoking non id getter in session scope --- REST clnt still gets an inited proxy 
+To avoid that , add global level setting in app.props file
+spring.jackson.serialization.FAIL_ON_EMPTY_BEANS=false
+

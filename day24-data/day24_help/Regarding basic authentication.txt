@@ -1,0 +1,36 @@
+Basic Authentication is a method(or scheme) for an HTTP client (eg  a web browser or Front end app) to provide a username and password when making a request.
+
+In Our REST API example : 
+
+When a client makes a request to protected(secured) resource , REST API sends back error code HTTP 401 (un authenticated) 
+If it's a web browser client , user will be prompted with a login form.
+
+You can see the in postman , resp header 
+WWW-Authenticate : Basic Realm
+
+If it's a postman or a  react app , client will have to send the "Authorization" header . If it succeeds , then client can access the secured resource.
+
+When using Basic Authentication, clients will include an encoded string(not encrypted )	 in the "Authorization" header of each request they make. The string is used by the request’s recipient(i.e Spring security filter)  to verify users’ identity and permissions to access a resource.
+
+The Authorization header follows this format:
+
+Authorization: Basic <credentials>
+
+Base64(username:password)
+
+
+Credentials are constructed like explained below : 
+The user’s username and password are combined with a colon.
+The resulting string is base64 encoded.
+So if your username and password are abc and 1234 , the combination is abc:1234 , and when base64 encoded, this becomes YWJjOjEyMzQ=
+
+So requests made by this client would be sent with the following header:
+
+eg : Authorization: Basic YWJjOjEyMzQ=
+
+Security issues : Since above info is just a text value , can be decoded easily. So should be sent over HTTPS , for encryption
+
+For base64 encoding : 
+Ref : https://www.base64encode.org/
+For decoding : 
+https://www.base64decode.org/

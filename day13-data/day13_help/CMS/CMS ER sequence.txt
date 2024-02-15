@@ -1,0 +1,171 @@
+Enter Advanced Hibernate
+Relationship between Entity n Entity 
+(Inheritance & Association : HAS-A)
+
+Types of associations
+one-to-one
+one-to-many
+many-to-one
+many-to-many
+
+Refer to E-R diagram : CMS ER diagram
+
+
+Regarding inheritance : 
+1. @MappedSuperlass : => inheritance in hibernate.
+JPA compliant --javax.persistence
+Common features : appears in a super class , has no corresponding table. All other entities can extend from same.
+
+eg : BaseEntity class annotated with @MappedSuperlass
+
+
+2. E-R between Topic 1 ------ * Tutorial (one to many association)
+
+It can be configured either in a uni-directional OR bi-directional manner.
+
+Bi dir => You can access tutorial details from topic AND vice versa
+
+Uni dir => You can either access tutorial details from topic OR vice versa.
+
+Which one is easier to configure ?
+uni-directional
+
+Which is more optimized way one ---> many or many ---> one?
+many ---> one 
+
+So we are considering Topic 1<----* Tutorial , uni dir , many to one association between entities.
+
+2.1 Tables : topics , tutorials
+2.2 POJOs : Topic n Tutorial
+
+New Important  Terms
+Owning side : the side of the association containing physical mapping (eg : Foreign key : in many-to-one or join table : in many-to-many)
+
+Topic : one side of the association , parent side , inverse side(non owning side)
+Tutorial : many side of the association , child side , owning side.
+
+In Topic class , do you need any additional properties ? 
+NO
+
+In Tutorial class , do you need any additional properties ?
+YES
+private Topic topic;
+
+What will happen , if you don't add any annotations on the association property(eg : Topic topic) ?
+Mapping Exception.
+
+Solution
+@ManyToOne
+private Topic topic;
+
+What will be JPA/Hibernate generated FK col name ? eg : topic_id
+Check it !
+
+Can you override this name ?
+YES 
+@JoinColumn(name="my_topic_id")
+
+Add many-to-one , uni dir association between Tutorial   *---->1 Author(User)
+
+
+Hibernate follows default fetching policies for different types of associations
+
+one-to-one : EAGER
+one-to-many : LAZY
+many-to-one : EAGER
+many-to-many : LAZY
+
+Confirm it .
+
+Objective
+1. Register user : as author
+Hint : session.persist
+User i/p : user details excluding id
+
+2. Add new topic
+User i/p : topic details
+
+3. Add tut by author under existing topic 
+User i/p : tut details , auth id , topic id
+
+4. Get all tut details 
+Observation : When fetch type was kept default (EAGER) in @ManyToOne , above resulted into fetching complete obj graph(ie. from all 3 tables : tuts , topics, users)
+
+If you need to lift ONLY tut details 
+
+Can you change the default , if required ? YES
+How ?
+
+@ManyToOne(fetch=FetchType.LAZY)
+private Topic topic;
+
+Similarly establish a relationship between User(in Author role) n Tutorial
+
+@ManyToOne(fetch=FetchType.LAZY)
+private User author;
+
+
+Objectives 
+5. Get all tut details 
+What will happen , if you try to access author n topic details , from the tester (outside session scope , in detached state) ?
+Obs : Hibernate throws org.hib.LazyInitializationExc
+
+When will hibernate throw LazyInitializationException ?
+Any time you are trying to access un-fetched data from DB , in a detached manner(outside the session scope)
+cases : one-to-many
+many-many
+session's load
+many-to-one : when you change the fetch type = LAZY
+
+
+un fetched data : i.e author or topic details : represented by : proxy (substitution) 
+proxy => un fetched data from DB
+
+Solutions
+1. Change the fetching policy of hibernate for to : EAGER
+
+
+Is it recommneded soln : NO (since even if you just want to access user's details , hib will fire query on many side) --will lead to worst performance.
+
+2. How to fetch the complete details , in a single join query ?
+Using "join fetch" keyword in JPQL
+eg : String jpql = "select t from Tutorial t join fetch t.author join fetch t.topic";
+
+
+
+Objective  Search tutorials by topic name
+User i/p : topic name
+Hint : jpql ="select t from Tutorial t where t.topic.topicName=:nm"
+
+3. One to one (This can be created in uni directional as well as bi directional manner)
+eg of bi-dir : 
+User 1<---->1 Address
+
+eg of uni dir from User 1----->1 Address
+
+Address details : addrLine1, addrLine2,city,state country,zipCode
+
+eg : 
+In User  class
+.... +
+private Address  address;
+Annotation : @OneToOne
+
+Observation : Problem faced with FK constraint violation , at the table creation time , since above makes Address as parent table n User as child side.
+
+So reverse the relationship
+
+User : parent side , non owning side
+Address : child side (containing user_id as the FK) , owning side
+
+In Address class 
+@OneToOne	
+@JoinColumn(name="user_id",nullable = false)
+private User owner;
+
+
+Objective : assign user address
+User i/p : user id , address dtls
+
+Create Role Entity
+Establish many-to-many relationship with User.

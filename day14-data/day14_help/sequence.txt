@@ -1,0 +1,480 @@
+Enter Advanced Hibernate
+Relationship between Entity n Entity 
+(Inheritance & Association : HAS-A)
+
+Types of associations
+one-to-one
+one-to-many
+many-to-one
+many-to-many
+
+Refer to E-R diagram : CMS ER diagram
+
+
+Regarding inheritance : 
+1. @MappedSuperlass : => inheritance in hibernate.
+JPA compliant --javax.persistence
+Common features : appears in a super class , has no corresponding table. All other entities can extend from same.
+
+eg : BaseEntity class annotated with @MappedSuperlass
+
+
+2. E-R between Topic 1 ------ * Tutorial (one to many association)
+
+It can be configured either in a uni-directional OR bi-directional manner.
+
+Bi dir => You can access tutorial details from topic AND vice versa
+
+Uni dir => You can either access tutorial details from topic OR vice versa.
+
+Which one is easier to configure ?
+uni-directional
+
+Which is more optimized way one ---> many or many ---> one?
+many ---> one 
+
+So we are considering Topic 1<----* Tutorial , uni dir , many to one association between entities.
+
+2.1 Tables : topics , tutorials
+2.2 POJOs : Topic n Tutorial
+
+New Important  Terms
+Owning side : the side of the association containing physical mapping (eg : Foreign key : in many-to-one or join table : in many-to-many)
+
+Topic : one side of the association , parent side , inverse side(non owning side)
+Tutorial : many side of the association , child side , owning side.
+
+In Topic class , do you need any additional properties ? 
+NO
+
+In Tutorial class , do you need any additional properties ?
+YES
+private Topic topic;
+
+What will happen , if you don't add any annotations on the association property(eg : Topic topic) ?
+Mapping Exception.
+
+Solution
+@ManyToOne
+private Topic topic;
+
+What will be JPA/Hibernate generated FK col name ? eg : topic_id
+Check it !
+
+Can you override this name ?
+YES 
+@JoinColumn(name="my_topic_id")
+
+Add many-to-one , uni dir association between Tutorial   *---->1 Author(User)
+
+
+Hibernate follows default fetching policies for different types of associations
+
+one-to-one : EAGER
+one-to-many : LAZY
+many-to-one : EAGER
+many-to-many : LAZY
+
+Confirm it .
+
+Objective
+1. Register user : as author
+Hint : session.persist
+User i/p : user details excluding id
+
+2. Add new topic
+User i/p : topic details
+
+3. Add tut by author under existing topic 
+User i/p : tut details , auth id , topic id
+
+4. Get all tut details 
+Observation : When fetch type was kept default (EAGER) in @ManyToOne , above resulted into fetching complete obj graph(ie. from all 3 tables : tuts , topics, users)
+
+If you need to lift ONLY tut details 
+
+Can you change the default , if required ? YES
+How ?
+
+@ManyToOne(fetch=FetchType.LAZY)
+private Topic topic;
+
+Similarly establish a relationship between User(in Author role) n Tutorial
+
+@ManyToOne(fetch=FetchType.LAZY)
+private User author;
+
+
+Objectives :
+5. Get all tut details 
+What will happen , if you try to access author n topic details , from the tester (outside session scope , in detached state) ?
+Obs : Hibernate throws org.hib.LazyInitializationExc
+
+When will hibernate throw LazyInitializationException ?
+Any time you are trying to access un-fetched data from DB , in a detached manner(outside the session scope)
+cases : one-to-many
+many-many
+session's load
+many-to-one : when you change the fetch type = LAZY
+
+
+un fetched data : i.e author or topic details : represented by : proxy (substitution) 
+proxy => un fetched data from DB
+
+Solutions
+1. Change the fetching policy of hibernate for to : EAGER
+
+
+Is it recommneded soln : NO (since even if you just want to access user's details , hib will fire query on many side) --will lead to worst performance.
+
+2. How to fetch the complete details , in a single join query ?
+Using "join fetch" keyword in JPQL
+
+
+
+
+Objective : 
+6.  Search tutorials by topic name
+User i/p : topic name
+In Tut Dao : 
+
+eg : String jpql = "select t from Tutorial t where t.topic.topicName=:nm";
+Will work BUT uses cross join
+To replace it by inner join , you can use 
+String jpql = "select t from Tutorial t join t.topic tp where tp.topicName=:nm";
+------------------------
+
+3. One to one (This can be created in uni directional as well as bi directional manner)
+eg of bi-dir : 
+User 1<---->1 Address
+
+eg of uni dir from User 1----->1 Address
+
+Address details : addrLine1, addrLine2,city,state country,zipCode
+
+eg : 
+In User  class
+.... +
+private Address  address;
+Annotation : @OneToOne
+
+Observation : Problem faced with FK constraint violation , at the table creation time , since above makes Address as parent table n User as child side.
+
+So reverse the relationship
+
+User : parent side , non owning side
+Address : child side (containing user_id as the FK) , owning side
+
+In Address class 
+@OneToOne	
+@JoinColumn(name="user_id",nullable = false)
+private User owner;
+
+
+Objective : assign user address
+User i/p : user id , address dtls
+-----------------------Revision Over----------------------------
+
+To Do (lab work)
+JUnit testing , in web mvn hibernate project
+
+Answer this 
+In one-to-one mapping between User n Address , to solve 
+Display user n address details 
+Update user address 
+What will be logically correct i/p ?
+User Id or Address Id :  User id
+
+Consider this
+What will happen if user tries to add address again ?
+Any exceptions ? NO
+Hibernate will happily assign multiple addresses to a single user , which IS NOT working as one-to-one mapping at all !!!!!!
+
+Suggested soln : Check this in B.L layer (the layer above DAO , eg : Java Bean)
+If the address is alrdy assigned , give err mesg to the user , prompting him --with a link / btn 
+Update Address ?
+Allow updation of the existing address , through : update address form .
+eg : Address a=session.get(Address.class.adrId);
+if(a != null)
+{
+ //setters
+}
+tx.commit();
+
+
+
+
+
+Any other  solution ?????????????
+YES !
+
+Answer this 
+If you are configuring one-to-one association between entities , which is a better approach ?
+1. Both entities having their separate PKs
+OR
+2. Sharing the same PK
+
+Answer : 2
+
+How to map a one-to-one association in which the primary key value of one entity (eg : User's PK)  is also used as the primary key value of the other entity(eg : Address) & also avoid earlier mentioned issues ?
+
+JPA Annotation : @MapsId
+
+Solution:
+You can use JPA’s @MapsId annotation to tell Hibernate that it will use the foreign key of an associated entity as the primary key.
+
+eg : In address table : PK will also work as FK referencing the PK of users table.
+
+
+Step1
+1. Create Address POJO extending from BaseEntity
+2. Add address related state
+eg : adr line1 ,line 2, city,state,country ... + 
+private User owner;
+3. Add usual annotations (@Entity , @Column etc)
+4. Which annotations on mapping property ?
+@OneToOne
+@JoinColumn(name="user_id",nullable=false)
+@MapsId
+private User owner;
+
+5. Any changes in Student POJO : NONE !
+
+---------------------------------
+
+Objectives 
+1. Create Role Entity
+properties : role id , roleName(enum)
+
+2. Establish many-to-many relationship with User.
+
+Many to Many association mapping between 2 entities
+eg : User n Role
+
+What will be required in DB for such many-many mapping  ?
+FK or association table : recommended is  association table
+
+It can be configured as bi-dir as well as uni dir association.
+
+Simpler example : uni dir many-many association.
+
+eg : User *----->* Role 
+Currently configured as uni dir.
+Default fetch type : LAZY
+
+Mandatory Annotation : @ManyToMany
+BUT then hibernate will decide the name of the link table
+To override : @JoinTable : with name
+Owning side : The side in which this physical mapping is defined  (i.e here user_id in joincolumns n role_id in inverseJoinColumns
+
+For better performance : use the collection type as Set <---- HashSet
+
+Which contract will have to be followed ? : equals n hashCode
+
+Can Add helper methods for convenience , in owning side : User (reco by Gavin King)
+addRole n removeRole
+
+NEVER use : cascade = CascadeType.ALL , it includes REMOVE
+
+What will happen ? : Unwanted data deletion
+(i.e if you remove User , all associated Role details will be removed !!!!!!!!!!!)
+
+
+
+Objectives : 
+1. Add New Role
+i/p : role name (enum)
+
+2. Assign user role (lab work)
+i/p : user id or email n role id or name
+
+Hint : get user from it's email : JPQL
+get role from it's name : JPQL
+In case of no excs , it implies =>  existing user n role
+simply establish the link in obj world --let hib insert a new entry in the join table
+user.addRole(role);//helper method 
+
+3. Objective 3 
+Try this
+3.1 insert roles first : DONE !
+3.2 New user registration
+request payload : 
+{name,email,password,Set<UserRole> roles}
+eg : {
+"firstName": "abc"
+....
+ roles :  [
+    "ADMIN","AUTHOR"
+  ]
+}
+map Set<UserRole> roles --> Set<Role entity> n call setter.
+
+4. Theory / Lab work
+Tutorial n Comment
+bi-dir , mappedBy cascade
+cascade remove ---delete tut n it's comments should be deleted 
+Tutorial 1<---->* Comment
+
+5. Lab work
+Tut --Tag : many to many with additional cols or better student admission
+
+
+Lab work :  get users by specific role name
+select u from User u join u.roles r where r.roleName=:rl
+
+-----------------Enter Value Types -----------------
+3. Entity type  vs Value Type
+(refer to a diag)
+
+Objective : User HAS-A AdharCard/Passport
+
+3.1 Passport : separate outer class 
+Data members : passport number , creation date , location, expiry date ,issuing  country 
+
+How to tell hibernate that Passport is not an entity : doesn't have independent existence(i.e it doesn't have independent life cycle) , no PK, no separate table
+
+@Embeddable : value type
+@Embedded : optional
+
+Lab Objective : display all users , having passport from specific country
+
+
+3.2 eg of Collection of basic value types
+eg : User 1----->* Hobbies (string)
+
+
+3.3 User HAS-A Card (multiple debit/credit cards)
+type (enum), issuer, exp date , cvv
+eg of collection of embeddable types
+
+
+-------------------
+Enter Spring
+Objective : Create Maven based Spring project in java SE
+
+1. Create Maven project , use packaging as "Jar".
+2. Copy plugins n dependencies from pom.xml in "day14-data\day14_help\spring-help\maven based spring Java SE app"
+3. Update Maven project (Force update , if required)
+4. Change perspective to Java
+OR 
+import ready made project : day13_spring_template
+
+5. Copy dependent & dependency beans from day12-data\day12_help\spring-help\rdy code.
+
+
+6. Create New -- spring bean config xml file , under src\main\resources
+7. Add namespace <beans>
+8. Configure dependent n dependency beans
+9. Start SC , by creating instance of ClasspathXmlApplicationContext .
+10. Get ready made bean from SC & test B.L
+11. Test spring bean life cycle.
+
+
+More details about <bean> tag 
+Attributes
+1. id --mandatory --bean unique id
+2. class --- mandatory -- Fully qualified bean class name
+3. scope --- In Java SE --- singleton | prototype
+In web app singleton | prototype | request | session
+Default scope = singleton
+singleton --- SC will share single bean instance for multiple requests/demands(via ctx.getBean)
+prototype -- SC creates NEW bean instance per  request/demand.
+
+4. lazy-init --- boolean attribute. default value=false.
+Applicable only to singleton beans.
+SC will auto create singleton spring bean instance --- @ SC start up.
+
+5. init-method --name of init style method(public void anyName() throws Exception{..})
+called by SC after setter based D.I
+applicable for singleton n prototype beans
+
+6. destroy-method --name of destroy style method
+(public void anyName() throws Exception{..})
+called by SC before GC of spring bean (applicable only to singleton beans)
+
+
+API 
+How to get ready to use spring beans from SC ?
+API of BeanFactory
+public <T> T getBean(String beanId,Class<T> beanClass) throws BeansException
+
+Spring bean life cycle
+Types of wiring 
+
+
+
+
+
+
+-------------------------------
+Additional Assignemnts : 
+2.1 Display all tutorial titles written by specified author , published after specific date
+I/P : author first n last name , date
+Steps 
+1. Add method : ItutorialDao
+List<String> getTutorialTitlesByAuthorAndDate(String fName ,String lName,LocalDate date);
+2. Tut DAO impl
+jpql="select t.title from Tutorial t where t.author.firstName=:fn ........" => cross join
+OR 
+jpql="select t.title from Tutorial t join t.author a where a.firstName=:fn ........"
+
+session.createQuery(...).set named IN params . get result list
+Test it with tester.
+
+
+2.2 Display  title n publish date of all the tutorials whose contents contain specific keyword
+I/P : keyword
+Steps
+1.Tut dao
+List<Tutorial> getByKeyword(String keyword);
+2. Tut dao impl
+jpql="select new pojos.Tutorial(title,publishDate)  from Tutorial t where t.contents like :key";
+tuts=session.crQuery(...).setParameter("key","%"+keyword+"%").....
+
+2.3 Display all topics containing tutorials authored by specific author(last name)
+I/P : author name
+1. TopicDao 
+List<Topic> getTopicsByTutAuthorLastName(String lastName);
+jpql="select t.topic from Tutorial t join t.author a where a.lastName=:nm";
+
+2.4 Display all user details staying in a specific city
+i/p : city
+1. Add a method : User Dao
+List<User> getByAddressCity(String city);
+
+2. DAO impl
+jpql="select a.owner from Address a where a.city=:city"
+
+2.5 Display user n address details
+i/p : adr id
+1. Adr Dao
+Address getUserAndAddressDetails(long adrId);
+Impl
+Address adr=session.get(...);
+null chking reqd
+not null --adr : PERSISTENT (since def fetch type : eeger --it will lift user details ! : 2 select queries)
+
+OR
+JPQL with join fetch.
+
+2.6 Update user address (Optional work)
+i/p adr id , new adr line1 , adr line 2 , city , zipcode 
+o/p message.
+
+2.7 Food for thought !!!!!!!!(OPTIONAL)
+In one-to-one mapping between User n Address , to solve 2.5 n 2.6 , what will be logically correct i/p ?
+User Id or Address Id ?
+
+Will be discussed tomorrow....
+
+2.8 Observ n conclude
+What will happen if user tries to add address again ?
+Any exceptions ? NO
+Hibernate will happily assign multiple addresses to a single user , which IS NOT working as one-to-one mapping at all !!!!!!
+
+Suggested soln : Check this in B.L layer (the lyaer above DAO , eg : Java Bean)
+If the address is alrdy assigned , give err mesg to the user , prompting him --with a link / btn 
+Update Address ?
+Allow updation of the existing address , through : update address form .
+
+

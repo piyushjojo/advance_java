@@ -1,0 +1,140 @@
+Today's Topics
+Many-Many with extra columns
+Revision
+Spring MVC in more details
+Spring MVC n Hibernate
+Time Permitting : Enter Spring Boot.
+
+
+Revise
+Spring MVC implementation steps n concepts(flow)
+
+Which are the important blocks of Spring MVC ? 
+(refer to spring mvc flow diagram n steps)
+
+1. o.s.w.s.DispatcherServlet
+Entry point of the spring MVC. Front Controller pattern
+Centralized dispatcher
+Wiil be intercepting all reqs coming from all clnts.
+Managed by WC 
+web.xml . Life cycle started at the deployment time .
+init ---> job of the D.S --> hybrid --xml 
+Def Name of master config file to start SC : spring-servlet.xml
+Def loc : WEB-INF
+read by D.S (DispatcherServlet)
+API of SC : o.s.b.f.BeanFactory <---- o.s.c.ApplicationContext : for Java SE : in hybrid approach <---o.s.c.s.ClasspathXmlApplcationContext : instance , to start SC
+
+In web app : API of SC : o.s.b.f.BeanFactory <---- o.s.c.ApplicationContext <---- WebApplicationContext<----- XmlWebApplicationContext : it's instance created by D.S @ web app dep time.
+
+
+2. Request Handling Controller (Handler)
+: prog supplied
+Mandatory annotations :
+@Controller : cls level annotation
+@RequestMapping : method level annotation
+which all HTTP requests , it can intercept ? : GET , POST , PUT , DELETE .....
+@GetMapping : get 
+@PostMapping : post
+@PutMapping : put 
+@DeleteMapping : delete
+
+3. HandlerMapping Bean 
+auto populated by SC : by looking at req handling methods (@RequestMapping) present in req handling controller(@Controller)
+Map
+key : value of @ReqMapping(or it's sub type) annotation eg : /hello
+value : F.Q Handler class Name+ Method name
+
+4. View Resolver :
+Job : Translation from Logical view (forward view name) ---> Actual view name
+propeties : prefix , suffix + viewClass : JstlView (to enable JSTL tags/actions)
+AVN(actual view name) =  prefix + LVN + suffix
+eg : /WEB-INF/views+LVN+.jsp
+
+5. View Layer (JSP) : prog supplied
+
+
+-------------------Revision Over----------------------------------------
+Objectives 
+0. Who is currently serving the index page : WC
+Serve it via SC
+HOW ????
+
+
+1. What is the type of the current response  -- static or dynamic : static
+
+
+1.5 Send dynamic response from MVC web app (eg : server timestamp)
+Using Model Attributes.
+
+
+2. What is a model attribute?
+It's the attribute(server side entry=k n value pair : String, Object)
+Purpose : to store the results of B.L
+Who creates  --- Req handling Controller(handler) --prog supplied
+Who sends it to whom : Handler ---> D.S
+After D.S gets actual view name from V.R : 
+D.S chks : are there any model attrs : 
+Yes : D.S saves model attrs under Request scope & then forwards the clnt to view layer .
+NO : D.S forwards the clnt to view layer .
+How to access these model attrs from JSP ?
+${requestScope.attrName}
+
+What are different ways for handler to add model attrs ?
+1. Via   o.s.w.s.ModelAndView?
+
+o.s.w.s.ModelAndView : class => holder for model attrs + logical view name
+Ctor : 
+ModelAndView(String viewName,String modelAttrName,Object modelAttrVal)
+eg : what can be valid ret type of req handling method
+String  OR ModelAndView : ModelAndView 
+
+
+2.Any Simpler way to send model attributes from Handler --> D.S ?
+
+Use  o.s.ui.Model : i/f ---holder (Map) of model attributes
+How do u add model attributes ?
+public Model addAttribute(String modelAttrName,Object modelAttrVal)
+eg : How to add 2 model attrs? : method chaining
+
+	
+Who will supply empty Model map (as the dependency)?  : SC
+IoC : DI
+How to tell SC that handler method needs a model map ? : add it as the arg of req handling method
+When req handling controller rets string : logical view name (Handler implicitly rets all model attr  map to D.S)
+
+
+
+
+
+
+3. Refer to ContentManagement System(modified flow diagram)
+Complete customer login flow --> in case of success redirect to -->topics.jsp --> logout link --> logout page.
+
+
+4. Handling request parameters in Controller ?
+eg : @RequestParam("price") double productPrice
+SC : double productPrice =Double.parseDouble(request.getParameter("price"))
+Reco : Match req param names with method arg names.
+URL : http://localhost:8080/day13.1/test/product?nm=pen&qty=10&price=40.5&manuDate=2020-1-1
+SC : def date time format : mon/day/year
+Problem : HTTP 400 : Bad request => some request data coming from client is invalid
+Def dat format : mon/day/yr
+How to tell SC : about exact Date time format : annotation.
+
+
+5. What's the meaning of HTTP status 400 : Bad Client Error
+Typically it represents some request parameter conversion error.
+
+Default date format used by SC : MM/dd/yyyy
+In order to change it use : @DateTimeFormat annotation.
+
+
+eg : @RequestParam("exp_date") @DateTimeFormat(pattern="yyyy-MM-dd")  Date expDate
+SC invokes : SimpleDateFormat sdf=new SDF("yyyy-MM-dd");
+Date expDate=sdf.parse(request.getParameter("exp_date"));
+
+6. Integrate it with Hibernate.
+6.1 Copy database.propeties n hibenrate-persistence.xml under <resources>
+Follow the instructions from "day17-data\day17_help\steps for spring mvc hibernate.txt"
+
+7. Enter spring boot.

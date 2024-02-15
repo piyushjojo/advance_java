@@ -1,0 +1,190 @@
+CMS Backend : day22.1
+Test end points
+
+1.User controller 
+user registration 
+
+2. Address Controller
+assignUserAddress
+
+3. Address Controller
+get user address 
+ http://localhost:8080/users/{userId}/address
+
+4. Address Controller
+ Update address : changeCity
+
+5. Add Topic
+
+6. Add Tutorial under topic : PROBLEM !!!!!!!!!!!!!!!!Fix it !
+
+n many more (check with swagger-ui)
+
+7. Delete user details : (test with customer id)
+deletes complete user object graph 
+
+Simple microservices demo
+Image Handling 
+Thymeleaf
+Unit Testing
+un inited proxy : JPA
+Enter Spring security
+--------------------------------------
+ref : day22.2 
+1. Set up RestTemplate demo. (Microservices demo)
+refer to diag : day20-data\day20_help\diagrams\RESTful webservice layers.png
+(lower half of the diagram)
+Objective :
+Get emp's a/c details
+eg : http://host:port/employees/{empId}/accounts/{acctNo}
+
+Banking DB : dac22_banking
+
+1.1 NetBanking REST Server
+(ready made code)
+Spring boot project : NetBankingRESTServer
+
+REST Client : day22.2 (net banking client) --EMS backend
+
+1.2 Employee App REST Server for React App & client to NetBanking
+1.3 Front end Postman (later add it in React app)
+
+Details
+2. Objective : Testing E-R with REST API + REST Client(RestTemplate)
+Test setup : Postman -- Emp Management API invoking REST Banking API
+
+Get Account summary for a bank customer.
+Resource : /accounts
+I/P : account no
+O/P : In case of success :account details , o.w resource not found .
+
+
+Layers on Netbanking server
+REST Controller --Service --Repository--POJO --DB
+Customer 1<------* BankAccount
+Customer : customer id(do not auto generate , use assigned id : just to show example) ,name, password 
+
+BankAccount : acct id (auto generation) AcctType(enum) ,balance + Customer owner
+
+
+
+How to make a REST call from one web app to another  ?
+Use : org.springframework.web.client.RestTemplate
+
+The RestTemplate class in Spring Framework is a synchronous HTTP client for making HTTP requests to consume RESTful web services. 
+
+It exposes a simple and easy-to-use template method API for sending an HTTP request and also handling the HTTP response. 
+
+The RestTemplate class also provides aliases for all supported HTTP request methods, such as GET, POST, PUT, PATCH , DELETE, and OPTIONS. 
+
+In a service layer : inject
+
+public class ClntService {
+private RestTemplate template;
+
+	@Autowired //autowire=constructor
+	public ClntService(RestTemplateBuilder builder) {
+		template = builder.build();
+	}
+
+
+}
+	// SpEL : spring expression language
+	@Value("${REST_AUTH_URL}")
+	private String authUrl;
+
+Use  Method of o.s.w.c.RestTemplate 
+
+1. public <T> ResponseEntity<T>
+		  postForEntity(String url,@Nullable Object request, Class<T> responseType, Object... uriVariables)  throws RestClientException
+
+2. public <T> ResponseEntity<T> getForEntity(String url,Class<T> responseType,Object... uriVariables) throws RestClientException
+------------------------
+2. Spring Boot Image handling  : project objective
+
+Objective : Image upload n download --from server side folder
+
+Use multipart request 
+
+An HTTP multipart request is an HTTP request that HTTP clients construct to send files and data over to an HTTP Server. It is commonly used by browsers and HTTP clients to upload files to the server.
+
+org.springframework.web.multipart.MultipartFile => A representation of an uploaded file received in a multipart request.
+
+A representation of an uploaded file received in a multipart request.
+The file contents are either stored in memory or temporarily on disk. In either case, the user is responsible for copying file contents to a session-level or persistent store as and if desired. The temporary storage will be cleared at the end of request processing.
+
+Stpes 
+0. Add a property in Entity n DTO , to store the image path
+eg : private String imagePath;
+
+1. To upload a file to a server side folder add the property (any property name)
+file.upload.location=images
+(This will be a folder relative to current project)
+
+#limiting max file size for upload
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=15MB
+
+2. File upload
+In Application class , create "images" folder , if not present
+2.1 Application class implements CommandLineRunner i/f n implement "run" method
+It will run exactly once @ spring boot app launching time
+OR 
+Create ImageHandlingService : as singleton n eager service bean
+n create "images" folder , if not present
+
+2.2 Create a rest controller
+Other emp details are already stored in DB. image  path has to be stored in the table n image should be uploaded in the "images" folder.
+
+i/p : emp id : path var
+MultipartFile : request param
+resp : Emp DTO (with image file name set) or Simply ApiResponse
+eg : Method : POST
+http://localhost:8080/api/employees/{empId}/images
+
+2.3 Image Handling Service 
+1. Create total path , using folder  location ,file separator , image file's original file name
+
+2. Copy multipart file into server side folder structure.
+API of java.nio.file.Files : helper class
+public static long copy​(InputStream in, Path target, CopyOption... options) throws IOException
+Copies all bytes from an input stream to a file returning no of bytes copied.
+
+3. Save  image path in Emp entity (to trigger update query) --setter
+
+4. Return Emp DTO to the caller.(service --> controller --> JSON representation to clnt)
+
+5. Test it with postman
+
+
+
+3. Serving images (download) from server side folder.
+i/p : emp id
+
+Steps 
+3.1 In Controller 
+Method = GET
+Add "produces" in the annotation(@GetMapping): to include image MediaType : JPEG_VALUE , GIF_VALUE, PNG_VALUE
+
+3.2 In service layer
+1. get emp details from emp id
+2. Get  complete path of the image
+emp's getter
+3. API of java.nio.file.Files : helper class
+Method :
+public static byte[] readAllBytes​(Path path) throws IOException
+Reads all the bytes from a file. The method ensures that the file is closed when all bytes have been read or an I/O error, or other runtime exception, is thrown.
+
+For java.nio.file.Path : Paths.get(String first,String ... more)
+4. return contents of image file(byte[]) to the controller
+
+
+From controller , simply add it in ResponseEntity n send it to the clnt.
+4. For react frontend , use : in <img> : src as 
+Method : GET
+http://localhost:8080/api/employees/{empId}/image
+---------------------
+Thymeleaf : exam objective
+
+Enter Spring security
+
